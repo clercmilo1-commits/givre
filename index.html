@@ -219,6 +219,15 @@ h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:-.
 .t-pack{background:linear-gradient(135deg,#e8f6ff,#8fb9d6);color:#0b2233}
 .t-glacier{background:linear-gradient(135deg,#4cc3ff,#3f51b5)}
 .t-aurora{background:linear-gradient(90deg,#34d399,#38bdf8,#a78bfa,#34d399);background-size:300% 100%;animation:prism 5s linear infinite}
+.t-master{background:linear-gradient(135deg,#a855f7,#6d28d9)}
+.t-gm{background:linear-gradient(135deg,#f43f5e,#7e22ce)}
+.t-legend{background:linear-gradient(135deg,#fbbf24,#ea580c 55%,#b91c1c)}
+.t-myth{background:linear-gradient(135deg,#0f172a,#7c3aed 60%,#22d3ee);box-shadow:0 0 0 1px #a78bfa inset}
+.t-eternal{background:linear-gradient(90deg,#fff7ae,#ffd700,#fff,#ffd700,#fff7ae);background-size:300% 100%;animation:prism 3s linear infinite;color:#3a2a00;box-shadow:0 0 10px #ffd70088}
+.t-blizzard{background:linear-gradient(135deg,#e2e8f0,#64748b);color:#0f172a}
+.t-storm{background:linear-gradient(135deg,#1e3a8a,#0ea5e9 60%,#e0f2fe);}
+.t-pole{background:linear-gradient(135deg,#ef4444,#fff 50%,#ef4444);color:#7f1d1d}
+.t-zero{background:linear-gradient(90deg,#020617,#38bdf8,#f0f9ff,#38bdf8,#020617);background-size:300% 100%;animation:prism 4s linear infinite;color:#fff;text-shadow:0 0 4px #000}
 .podium{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:8px;align-items:end;margin-top:6px}
 .pod{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center;min-width:0}
 .pod .pname{font-weight:700;font-size:13.5px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -241,6 +250,15 @@ h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:-.
 .rankno small{display:block;font-family:var(--body);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .req{border-color:color-mix(in oklab,var(--flame-b) 45%,var(--line));background:color-mix(in oklab,var(--flame-b) 10%,var(--surface))}
 .lock-card{gap:6px}
+.pick{width:100%;text-align:left}
+.pick .rd{width:24px;height:24px;border-radius:50%;border:2px solid var(--line);flex:none;display:grid;place-items:center;transition:background .15s,border-color .15s}
+.pick[aria-pressed="true"]{border-color:color-mix(in oklab,var(--ice) 55%,var(--line))}
+.pick[aria-pressed="true"] .rd{background:var(--ice);border-color:var(--ice)}
+.pick[aria-pressed="true"] .rd::after{content:'';width:9px;height:9px;border-radius:50%;background:var(--bg)}
+.av.more{background:var(--surface-2);color:var(--fg);font-size:12px;border:1px solid var(--line)}
+.btn svg{width:18px;height:18px}
+.end-item{gap:10px}
+.end-item .seg button{min-height:44px}
 .nav button{font-size:10.5px}
 
 /* Navigation */
@@ -647,7 +665,7 @@ function viewToday(){
       <div class="row" style="gap:8px;justify-content:center;flex-wrap:wrap"><div class="streak ${st?'':'off'}" id="streak">${flameSVG(st>0)}<span id="streakN">${st}</span><small>jour${st>1?'s':''} de série</small></div><span id="homeTier">${tierBadge(st,SOLO_TIERS)}</span></div>
       ${week}
     </section>
-    ${duoCardsHome()}
+    ${groupHome()}
     <section class="section">
       <div class="section-head"><h2 style="font-size:20px">Aujourd'hui</h2><span class="muted" style="font-size:13px">${niceDate(k)}</span></div>
       <div class="daybar"><div class="bar"><b id="dayBar"></b></div><span class="count" id="dayCount">0/0</span></div>
@@ -669,7 +687,7 @@ function weekStrip(k){
 }
 function taskHTML(t,k){
   const done=isDone(k,t.key);
-  const sub = t.kind==='ch' ? `Défi ${t.len||30} jours · jour ${t.day}/${t.len||30}` : esc(S.arc.name);
+  const sub = t.kind==='ch' ? `Défi ${t.len||30} jours · jour ${t.day}/${t.len||30}` : esc(S.arc.name)+(S.arc.groupId?' · groupe':'');
   return `<button class="task ${done?'done':''}" style="--c:${t.color}" data-act="toggle" data-key="${t.key}" aria-pressed="${done}">
     <span class="fill"></span><span class="ico">${icon(t.icon)}</span>
     <span class="txt"><span class="name">${esc(t.name)}</span><span class="sub">${sub}</span></span>
@@ -706,7 +724,8 @@ function viewDefis(){
         <div class="row"><span class="pill">En cours</span><span class="spacer"></span><span class="muted" style="font-size:13px">${inArc(k)?'Jour '+arcDay(k)+'/'+a.days:(k>arcEnd(a)?'Terminé':'')}</span></div>
         <div class="ch" style="--c:${a.color}"><div class="ico">${esc(a.emoji)}</div><div class="body"><h3>${esc(a.name)}</h3><p>${a.rules.length} règle${a.rules.length>1?'s':''} chaque jour pendant ${a.days} jours.</p></div></div>
         <div class="chips">${a.rules.map(r=>`<span class="chip">${icon(r.icon)} ${esc(r.name)}</span>`).join('')}</div>
-        <div class="row"><button class="btn small" data-act="editArc">Modifier les règles</button><button class="btn small ghost" data-act="askStopArc">Arrêter</button></div>
+        ${a.groupId?`<div class="row"><span class="pill">👥 ${esc((myGroup()||{}).name||'Défi de groupe')}</span></div><div class="row"><button class="btn small" data-act="groupSheet" data-id="${a.groupId}">Voir le groupe</button><button class="btn small ghost" data-act="askStopArc">Arrêter</button></div>`
+          :`<div class="row"><button class="btn small" data-act="editArc">Modifier les règles</button><button class="btn small ghost" data-act="askStopArc">Arrêter</button></div>`}
         <div id="stopArcZone"></div>
       </div>` : '';
     body = `${cur}
@@ -752,7 +771,7 @@ function chCard(c,active){
 }
 function viewProgres(){
   const a=S.arc, k=todayKey();
-  if(!a) return `<div class="view">${topbar('Progrès')}<div class="card empty"><p class="muted">Lance un défi de 90 jours pour voir ton calendrier.</p></div></div>`;
+  if(!a) return `<div class="view">${topbar('Progrès')}<div class="card empty"><p class="muted">Lance un défi de 90 jours pour voir ton calendrier.</p></div>${pastArcsSection()}</div>`;
   let cells='', full=0, past=0;
   const last=Math.min(arcDay(k), a.days);
   for(let i=0;i<a.days;i++){
@@ -782,6 +801,7 @@ function viewProgres(){
     ${actCh.length?`<div class="section"><span class="label">Défis en cours</span>${actCh.map(c=>chCard(c,true)).join('')}</div>`:''}
     <div class="section"><div class="section-head"><span class="label">Photos du jour</span><span class="muted" style="font-size:12.5px">${ended?'Révélées':'Révélées au jour '+a.days}</span></div>
       <div class="gallery" id="gallery"></div></div>
+    ${pastArcsSection()}
   </div>`;
 }
 async function fillGallery(){
@@ -795,7 +815,7 @@ async function fillGallery(){
 /* ---------- Amis (Supabase) ---------- */
 const SUPA_URL='https://cnoaizuvnfaavjgnxubi.supabase.co';
 const SUPA_KEY='sb_publishable_CHGHNNkyziFdBv_6GqS-cQ_0zR7dnx3';
-const SOC={viewers:[],sb:null, me:null, ready:false, busy:false, err:'', friends:[], duos:[], loaded:false, pendingCode:null};
+const SOC={viewers:[],sb:null, me:null, ready:false, busy:false, err:'', friends:[], groups:[], v3:true, loaded:false, pendingCode:null};
 try{ const q=new URLSearchParams(location.search).get('ami'); if(q) SOC.pendingCode=q.toUpperCase().slice(0,12); }catch(e){}
 function sbc(){
   if(SOC.sb) return SOC.sb;
@@ -809,7 +829,9 @@ function errText(e){
   if(/ton_code/.test(m)) return 'C\'est ton propre code.';
   if(/pas_ami/.test(m)) return 'Ajoute-le d\'abord en ami.';
   if(/pas_de_demande/.test(m)) return 'Cette demande n\'existe plus.';
-  if(/stats_detail|viewers|visibility|accept_duo|board_solo|board_groups/.test(m)) return 'Il manque la mise à jour Supabase (script v2).';
+  if(/taille_groupe/.test(m)) return 'Un groupe, c\'est 2 à 10 personnes.';
+  if(/group_members|create_group|accept_group|leave_group|public\.groups/.test(m)) return 'Il manque la mise à jour Supabase (script v3).';
+  if(/stats_detail|viewers|visibility|board_solo/.test(m)) return 'Il manque la mise à jour Supabase (script v2).';
   if(/anonymous/i.test(m)&&/disabled/i.test(m)) return 'Active « Allow anonymous sign-ins » dans Supabase (Authentication).';
   if(/profiles_pseudo_lower|duplicate key/.test(m)) return 'Ce pseudo est déjà pris. Choisis-en un autre.';
   if(/relation .* does not exist|schema cache/i.test(m)) return 'Le script SQL n\'a pas encore été lancé dans Supabase.';
@@ -849,9 +871,9 @@ async function socialLoad(){
       profs=p.data||[]; st=s.data||[]; SOC.v2 = !dt.error; det=dt.data||[];
     }
     SOC.friends=ids.map(id=>({id, pseudo:(profs.find(p=>p.id===id)||{}).pseudo||'?', data:(st.find(s=>s.user_id===id)||{}).data||null, detail:(det.find(s=>s.user_id===id)||{}).data||null}));
-    const {data:d}=await c.from('duos').select('*'); SOC.duos=d||[];
     const {data:mp}=await c.from('profiles').select('*').eq('id',me.id).maybeSingle(); if(mp) SOC.me=mp;
     const vw=await c.from('viewers').select('viewer').eq('owner',me.id); SOC.viewers=(vw.data||[]).map(x=>x.viewer);
+    await loadGroups(c,SOC.me);
     SOC.loaded=true; SOC.err='';
   }catch(e){ SOC.err=errText(e); }
   const ae=document.activeElement;
@@ -864,20 +886,87 @@ function histMap(n){
 }
 function myStats(){
   const k=todayKey(), di=dayInfo(k);
-  const duos=activeDuos().map(d=>{ const fid=partnerOf(d), f=SOC.friends.find(x=>x.id===fid); if(!f) return null;
-    return {with:fid, streak:duoStreak(f,d.start_date), day:k, both:okDay(k)&&fOk(f,k)}; }).filter(Boolean);
+  const g=myGroup();
+  const groups=g?[{id:g.id, streak:groupStreak(g), day:k, st:groupDay(g,k)}]:[];
   return {v:2, at:Date.now(), day:k,
     streak:streak(), best:bestStreak(), gels:gelsLeft(),
     today:{done:di.done,total:di.total,full:di.full||di.frozen},
-    hist:histMap(150), duos};
+    hist:histMap(150), groups};
 }
 function myDetail(){
   const k=todayKey(), a=S.arc;
   return {arc:a?{name:a.name,emoji:a.emoji,days:a.days,start:a.start,day:inArc(k)?arcDay(k):null}:null,
     ch:S.challenges.filter(c=>chActive(c,k)).map(c=>({name:c.name,icon:isImg(c.icon)?'💪':c.icon,day:diffDays(c.start,k)+1,len:chDays(c)}))};
 }
-const activeDuos = () => SOC.duos.filter(d=>(d.status||'active')==='active');
-const partnerOf = d => d.a===SOC.me.id ? d.b : d.a;
+/* ---------- Groupes ---------- */
+const myGroup = () => (SOC.groups||[]).find(g=>g.myStatus==='active') || null;
+const groupInvites = () => (SOC.groups||[]).filter(g=>g.myStatus==='invited');
+const activeMembers = (g,k) => g.members.filter(m=>m.status==='active' && m.joined_on && (!k || m.joined_on<=k));
+function arcFromGroup(g,start){
+  const p=g.program||{};
+  return {id:uid(),progId:null,groupId:g.id,name:p.name||g.name,emoji:p.emoji||'🔥',color:p.color||'#3b82f6',days:p.days||90,start,rules:cloneRules(p.rules||[])};
+}
+async function loadGroups(c,me){
+  const {data:mine,error}=await c.from('group_members').select('group_id,status').eq('user_id',me.id);
+  if(error){ SOC.v3=false; SOC.groups=[]; return; }
+  SOC.v3=true;
+  const gids=(mine||[]).map(x=>x.group_id);
+  if(!gids.length){ SOC.groups=[]; syncArcGroup(); return; }
+  const [g,m]=await Promise.all([c.from('groups').select('*').in('id',gids), c.from('group_members').select('*').in('group_id',gids)]);
+  const rows=m.data||[];
+  const mids=[...new Set(rows.map(x=>x.user_id))].filter(x=>x!==me.id);
+  let profs=[], st=[];
+  if(mids.length){
+    const [pp,ss]=await Promise.all([c.from('profiles').select('id,pseudo').in('id',mids), c.from('stats').select('user_id,data').in('user_id',mids)]);
+    profs=pp.data||[]; st=ss.data||[];
+  }
+  SOC.groups=(g.data||[]).map(gr=>({...gr, myStatus:(mine.find(x=>x.group_id===gr.id)||{}).status,
+    members:rows.filter(x=>x.group_id===gr.id).map(x=>({id:x.user_id, status:x.status, joined_on:x.joined_on, invited_by:x.invited_by, me:x.user_id===me.id,
+      pseudo:x.user_id===me.id?me.pseudo:((profs.find(pp=>pp.id===x.user_id)||{}).pseudo||'?'),
+      data:x.user_id===me.id?null:((st.find(ss=>ss.user_id===x.user_id)||{}).data||null)}))}));
+  syncArcGroup();
+}
+// Garde le défi 90 jours du téléphone d'accord avec le serveur
+function syncArcGroup(){
+  if(!SOC.v3) return;
+  const g=myGroup();
+  if(S.arc && S.arc.groupId && (!g || g.id!==S.arc.groupId)){ delete S.arc.groupId; save(); }
+  else if(!S.arc && g){ const me=g.members.find(m=>m.me); S.arc=arcFromGroup(g,(me&&me.joined_on)||todayKey()); save(); }
+}
+// État d'un membre un jour donné : f = complet (ou gel), p = partiel, m = rien
+function memState(m,k){
+  if(m.me){ const d=dayInfo(k); return (d.full||d.frozen)?'f':(d.done>0?'p':'m'); }
+  const s=(m.data&&m.data.hist&&m.data.hist[k])||'';
+  return (s==='f'||s==='z')?'f':(s==='p'?'p':'m');
+}
+// Règle de la flamme de groupe
+// 2 ou 3 membres : tout le monde au complet sinon elle s'éteint.
+// 4 et plus : tout le monde au complet = +1 ; au moins la moitié au complet et le reste en partiel = elle stagne ;
+// une personne qui n'a rien fait, ou moins de la moitié au complet = elle s'éteint.
+function groupDay(g,k){
+  const act=activeMembers(g,k), n=act.length;
+  if(n<2) return 'skip';
+  const st=act.map(m=>memState(m,k));
+  if(st.includes('m')) return 'reset';
+  const full=st.filter(x=>x==='f').length;
+  if(full===n) return 'up';
+  if(n<=3) return 'reset';
+  return full*2>=n ? 'stay' : 'reset';
+}
+function groupStreak(g){
+  const t=todayKey(); let k=g.start_date, s=0;
+  for(let i=0;i<1200 && k<t;i++){ const r=groupDay(g,k); if(r==='up') s++; else if(r==='reset') s=0; k=addDays(k,1); }
+  return s + (groupDay(g,t)==='up'?1:0);
+}
+function memToday(m){
+  if(m.me){ const d=dayInfo(todayKey()); return {seen:true,full:d.full||d.frozen,done:d.done,total:d.total}; }
+  return friendToday(m);
+}
+function groupRuleText(n){
+  return n<=3
+    ? `Groupe de ${n} : la flamme avance seulement si tout le monde finit sa journée au complet. Sinon, elle s'éteint pour tout le monde.`
+    : `Tout le monde au complet : +1. Au moins la moitié au complet et le reste en partiel : la flamme reste au même nombre. Si quelqu'un ne fait rien, ou si moins de la moitié a fini au complet : elle s'éteint pour tout le monde.`;
+}
 let pubT=null;
 function schedulePublish(){ if(!SOC.me) return; clearTimeout(pubT); pubT=setTimeout(publishStats,1500); }
 async function publishStats(){
@@ -899,40 +988,65 @@ function friendStreak(f){
   for(let i=0;i<400;i++){ if(fOk(f,k)){n++;k=addDays(k,-1);} else break; }
   return n;
 }
-function duoWith(fid){ const me=SOC.me&&SOC.me.id; return SOC.duos.find(d=>(d.a===me&&d.b===fid)||(d.b===me&&d.a===fid)); }
-function duoStreak(f,start){
-  const both=k=>okDay(k)&&fOk(f,k);
-  let k=todayKey(), n=0; if(both(k)) n++; k=addDays(k,-1);
-  for(let i=0;i<400 && k>=start;i++){ if(both(k)){n++;k=addDays(k,-1);} else break; }
-  return n;
-}
 function avatar(p){ const ch=(p||'?').trim().charAt(0).toUpperCase(); let h=0; for(const c of p||'') h=(h*31+c.charCodeAt(0))%360;
   return `<span class="av" style="background:hsl(${h} 55% 45%)">${esc(ch)}</span>`; }
+function avStack(list,max){ max=max||4; return list.slice(0,max).map(a=>avatar(a)).join('')+(list.length>max?`<span class="av more">+${list.length-max}</span>`:''); }
 
-function duoRequestsHome(){
+function groupInvitesHTML(){
   if(!SOC.me) return '';
-  const inc=SOC.duos.filter(d=>d.status==='pending' && d.requested_by && d.requested_by!==SOC.me.id);
-  return inc.map(d=>{ const fid=partnerOf(d), f=SOC.friends.find(x=>x.id===fid); const ps=f?f.pseudo:'Un ami';
-    return `<div class="card req"><div class="row">${avatar(ps)}<div style="flex:1;min-width:0"><strong>@${esc(ps)} te propose un duo</strong>
-      <span class="muted" style="display:block;font-size:13px">Une série commune : si l'un de vous rate sa journée, vous la perdez tous les deux.</span></div></div>
-      <div class="row"><button class="btn small" data-act="acceptDuo" data-id="${fid}">Accepter</button><button class="btn small ghost" data-act="declineDuo" data-id="${fid}">Refuser</button></div></div>`; }).join('');
-}
-function duoCardsHome(){
-  if(!SOC.me) return '';
-  const req=duoRequestsHome();
-  if(!activeDuos().length) return req;
-  const rows=activeDuos().map(d=>{
-    const fid=partnerOf(d), f=SOC.friends.find(x=>x.id===fid); if(!f) return '';
-    const n=duoStreak(f,d.start_date), ft=friendToday(f), mine=dayInfo(todayKey());
-    const fs = ft.full?'<b class="ok">a fini sa journée ✓</b>':(ft.seen?`en est à ${ft.done}/${ft.total}`:'n\'a pas encore ouvert l\'appli aujourd\'hui');
-    const nudge = ft.full && !(mine.full||mine.frozen) ? '<p class="nudge">Ton pote a tout fait. Ne lui fais pas perdre la série.</p>' : '';
-    return `<button class="duo" data-act="friend" data-id="${f.id}">
-      <div class="row">${avatar(f.pseudo)}<div style="flex:1;min-width:0;text-align:left"><strong>Duo avec @${esc(f.pseudo)}</strong><span class="muted" style="display:block;font-size:13px">@${esc(f.pseudo)} ${fs}</span></div>
-      <span class="duo-n">${flameSVG(n>0)}${n}</span></div>${nudge}</button>`;
+  return groupInvites().map(g=>{
+    const by=g.members.find(m=>m.id===(g.members.find(x=>x.me)||{}).invited_by);
+    const names=activeMembers(g).map(m=>m.pseudo), p=g.program||{};
+    return `<div class="card req"><div class="row"><div class="avs sm">${avStack(names,3)}</div><div style="flex:1;min-width:0"><strong>@${esc(by?by.pseudo:'Un ami')} t'invite dans « ${esc(g.name)} »</strong>
+      <span class="muted" style="display:block;font-size:13px">${esc(p.emoji||'')} ${esc(p.name||'')} · ${p.days||90} jours · ${names.length} membre${names.length>1?'s':''}</span></div></div>
+      <p class="muted" style="margin:0;font-size:13px">Même défi pour tout le groupe, et une flamme commune.${S.arc&&S.arc.groupId!==g.id?` Ça remplace ton défi en cours (${esc(S.arc.name)}).`:''}</p>
+      <div class="row"><button class="btn small" data-act="joinGroup" data-id="${g.id}">Rejoindre</button><button class="btn small ghost" data-act="declineGroup" data-id="${g.id}">Refuser</button></div>
+      <div id="gz-${g.id}"></div></div>`;
   }).join('');
-  return req+`<section class="section"><span class="label">Tes duos</span>${rows}</section>`;
 }
-
+function groupCardHTML(){
+  const g=myGroup(); if(!g) return '';
+  const act=activeMembers(g), n=groupStreak(g), k=todayKey();
+  const done=act.filter(m=>memToday(m).full).length, mine=memToday(act.find(m=>m.me)||{me:true});
+  const waiting=g.members.filter(m=>m.status==='invited').length;
+  const sub = act.length<2 ? `En attente : ${waiting} invitation${waiting>1?'s':''} envoyée${waiting>1?'s':''}` : `${done}/${act.length} ont fini leur journée`;
+  const nudge = act.length>=2 && !mine.full && done===act.length-1 ? '<p class="nudge">Tout le groupe a fini sauf toi. Ne fais pas perdre la flamme.</p>' : '';
+  return `<section class="section"><span class="label">Ton groupe</span><button class="duo" data-act="groupSheet" data-id="${g.id}">
+    <div class="row"><div class="avs sm">${avStack(act.map(m=>m.pseudo),4)}</div><div style="flex:1;min-width:0;text-align:left"><strong>${esc(g.name)}</strong><span class="muted" style="display:block;font-size:13px">${sub}</span></div>
+    <span class="duo-n">${flameSVG(n>0)}${n}</span></div>${nudge}</button></section>`;
+}
+const groupHome = () => groupInvitesHTML()+groupCardHTML();
+function groupSheetHTML(g){
+  const act=activeMembers(g), inv=g.members.filter(m=>m.status==='invited'), n=groupStreak(g), p=g.program||{};
+  const st=m=>{ if(m.status==='invited') return '<span class="muted">Invité</span>'; const t=memToday(m);
+    return t.full?'<b class="ok">Fini ✓</b>':(t.seen?`<span class="muted">${t.done}/${t.total}</span>`:'<span class="muted">Pas ouvert</span>'); };
+  return `<div class="row"><h2>${esc(g.name)}</h2><span class="spacer"></span><button class="btn small ghost" data-act="closeSheet">Fermer</button></div>
+    <div class="card me-rank"><div class="row"><span class="duo-n big">${flameSVG(n>0)}${n}</span>${tierBadge(n,GROUP_TIERS)}<span class="spacer"></span><span class="pill">${esc(p.emoji||'')} ${esc(p.name||'')}</span></div>
+      <p class="muted" style="margin:0;font-size:13px">${groupRuleText(Math.max(2,act.length))} Un gel compte comme une journée complète.</p></div>
+    <div class="section"><span class="label">Membres · ${act.length}${inv.length?` (+${inv.length} invité${inv.length>1?'s':''})`:''}</span>
+      <div class="list">${act.concat(inv).map(m=>`<div class="li">${avatar(m.pseudo)}<span class="t">@${esc(m.pseudo)}${m.me?' <small class="muted">(toi)</small>':''}</span>${st(m)}</div>`).join('')}</div></div>
+    <div class="section"><span class="label">Règles du défi</span><div class="chips">${(p.rules||[]).map(r=>`<span class="chip">${icon(r.icon)} ${esc(r.name)}</span>`).join('')}</div>
+      <p class="muted" style="margin:0;font-size:12.5px">Les règles d'un défi de groupe sont les mêmes pour tout le monde et ne se modifient pas.</p></div>
+    <button class="btn danger block" data-act="askLeaveGroup" data-id="${g.id}">Quitter le groupe</button><div id="leaveZone"></div>`;
+}
+let GD=null;
+function readGName(){ const i=sheetEl&&sheetEl.querySelector('#g-name'); if(i&&GD) GD.name=i.value; }
+function groupCreateHTML(){
+  const head=`<div class="row"><h2>Créer un groupe</h2><span class="spacer"></span><button class="btn small ghost" data-act="closeSheet">Fermer</button></div>`;
+  if(GD.step===1){
+    return `${head}<p class="muted" style="margin:0;font-size:13.5px">Étape 1 sur 2 : choisis le nom et les amis à inviter (2 à 10 personnes avec toi).</p>
+      <div class="field"><label class="label" for="g-name">Nom du groupe</label><input id="g-name" maxlength="24" autocomplete="off" placeholder="ex. Les givrés" value="${esc(GD.name)}"></div>
+      <div class="section"><div class="section-head"><span class="label">Amis à inviter</span><span class="muted" style="font-size:12.5px">${GD.sel.length}/9</span></div>
+      ${SOC.friends.length?`<div class="list">${SOC.friends.map(f=>`<button class="li pick" data-act="gPick" data-id="${f.id}" aria-pressed="${GD.sel.includes(f.id)}">${avatar(f.pseudo)}<span class="t">@${esc(f.pseudo)}</span><span class="rd"></span></button>`).join('')}</div>`
+        :'<p class="muted" style="margin:0">Ajoute d\'abord des amis avec leur code.</p>'}</div>
+      <button class="btn block" data-act="gNext" ${GD.sel.length?'':'disabled'}>Suivant</button>`;
+  }
+  return `${head}<p class="muted" style="margin:0;font-size:13.5px">Étape 2 sur 2 : choisis le défi 90 jours du groupe.</p>
+    <div class="list">${S.programs.map(p=>`<button class="li pick" data-act="gProg" data-id="${p.id}" aria-pressed="${GD.prog===p.id}"><span class="e" style="background:color-mix(in oklab,${p.color} 22%,transparent)">${esc(p.emoji)}</span><span class="t">${esc(p.name)}<small class="muted" style="display:block;font-weight:500">${p.rules.length} règle${p.rules.length>1?'s':''} · ${p.days||90} jours</small></span><span class="rd"></span></button>`).join('')}</div>
+    <p class="muted" style="margin:0;font-size:13px">Tout le groupe aura les mêmes règles, sans pouvoir les modifier.${S.arc?` Ça remplace ton défi en cours (${esc(S.arc.name)}).`:''} Tes défis de 30 jours et d'une semaine continuent.</p>
+    <div class="row"><button class="btn ghost" data-act="gBack">Retour</button><button class="btn" style="flex:1" data-act="gCreate" ${GD.prog&&!SOC.busy?'':'disabled'}>${SOC.busy?'Un instant…':'Envoyer les invitations'}</button></div>`;
+}
+function leaveGroupQuiet(gid){ if(gid && SOC.sb && SOC.me) SOC.sb.rpc('leave_group',{gid}).then(()=>socialLoad()).catch(()=>{}); }
 function viewAmis(){
   const head=topbar('Amis');
   if(!SOC.ready) return `<div class="view">${head}<div class="card empty"><p class="muted">Connexion…</p></div></div>`;
@@ -940,7 +1054,7 @@ function viewAmis(){
     return `<div class="view">${head}
       <div class="card"><h2 style="font-size:21px">Choisis ton pseudo</h2>
         <p class="muted" style="margin:0">Pas d'email, pas de mot de passe. Tes amis te verront avec ce pseudo, et verront ta série et ton calendrier. Tes photos restent sur ton téléphone.</p>
-        <div class="field"><label class="label" for="pseudo">Pseudo</label><input id="pseudo" maxlength="20" autocomplete="off" autocapitalize="off" placeholder="ex. antton" value="${esc(SOC.pseudoDraft||'')}"></div>
+        <div class="field"><label class="label" for="pseudo">Pseudo (10 caractères max)</label><input id="pseudo" maxlength="10" autocomplete="off" autocapitalize="off" placeholder="ex. antton" value="${esc(SOC.pseudoDraft||'')}"></div>
         <button class="btn block" data-act="signup" ${SOC.busy?'disabled':''}>${SOC.busy?'Un instant…':'C\'est parti'}</button>
         ${SOC.err?`<p class="err">${esc(SOC.err)}</p>`:''}
         ${SOC.pendingCode?`<p class="muted" style="margin:0;font-size:13px">Tu as été invité. Tu seras ajouté en ami dès que ton pseudo est créé.</p>`:''}
@@ -950,7 +1064,6 @@ function viewAmis(){
   const board=[{id:me.id,pseudo:me.pseudo,streak:myS,best:bestStreak(),today:dayInfo(todayKey()),me:true}]
     .concat(SOC.friends.map(f=>({id:f.id,pseudo:f.pseudo,streak:friendStreak(f),best:(f.data&&f.data.best)||0,ft:friendToday(f)})))
     .sort((a,b)=>b.streak-a.streak||b.best-a.best);
-  const duoList=SOC.duos.map(d=>SOC.friends.find(x=>x.id===partnerOf(d))).filter(Boolean);
   return `<div class="view">${head}
     <div class="card code-card"><span class="label">Ton code ami</span>
       <div class="row"><span class="code">${esc(me.friend_code)}</span><span class="spacer"></span><span class="muted">@${esc(me.pseudo)}</span></div>
@@ -958,7 +1071,8 @@ function viewAmis(){
     <div class="card"><span class="label">Ajouter un ami</span>
       <div class="row"><input id="addCode" class="code-in" maxlength="8" autocomplete="off" autocapitalize="characters" placeholder="Son code" aria-label="Code de ton ami" value="${SOC.err?esc(SOC.codeDraft||''):''}"><button class="btn small" data-act="addFriend" ${SOC.busy?'disabled':''}>Ajouter</button></div>
       ${SOC.err?`<p class="err">${esc(SOC.err)}</p>`:''}</div>
-    ${duoList.length?duoCardsHome():''}
+    <button class="btn ghost block" data-act="newGroup">${I.users} Créer un groupe</button>
+    ${groupHome()}
     <div class="section"><div class="section-head"><span class="label">Classement des séries</span><button class="link" data-act="refreshSocial">Actualiser</button></div>
       ${SOC.friends.length?'':'<p class="muted" style="margin:0">Ajoute un ami avec son code pour lancer le classement.</p>'}
       <div class="list">${board.map((p,i)=>{
@@ -971,7 +1085,7 @@ function viewAmis(){
 }
 
 function friendSheetHTML(f){
-  const d=f.data, duo=duoWith(f.id), ft=friendToday(f);
+  const d=f.data, ft=friendToday(f);
   const det = f.detail || (d&&d.v===1 ? d : null);
   let cal='';
   if(det&&det.arc){
@@ -990,26 +1104,20 @@ function friendSheetHTML(f){
     ${d&&!det?`<div class="card lock-card"><strong>🔒 Profil privé</strong><p class="muted" style="margin:0;font-size:13.5px">@${esc(f.pseudo)} montre seulement sa série, sa meilleure série et sa journée.</p></div>`:''}
     ${det&&det.arc?`<div class="card"><div class="row"><h3>${esc(det.arc.emoji)} ${esc(det.arc.name)}</h3><span class="spacer"></span>${det.arc.day?`<span class="pill">Jour ${det.arc.day}/${det.arc.days}</span>`:''}</div><div class="cal">${cal}</div></div>`:''}
     ${det&&det.ch&&det.ch.length?`<div class="section"><span class="label">Défis en cours</span><div class="chips">${det.ch.map(c=>`<span class="chip">${esc(c.icon)} ${esc(c.name)} · J${c.day}/${c.len||30}</span>`).join('')}</div></div>`:''}
-    <div class="section"><span class="label">Duo</span>
-      ${duo&&duo.status==='pending'?(duo.requested_by===SOC.me.id
-        ?`<p class="muted" style="margin:0;font-size:13.5px">Demande envoyée. @${esc(f.pseudo)} doit l'accepter depuis son appli.</p><button class="btn ghost block" data-act="declineDuo" data-id="${f.id}">Annuler la demande</button>`
-        :`<p class="muted" style="margin:0;font-size:13.5px">@${esc(f.pseudo)} te propose un duo.</p><div class="row"><button class="btn small" data-act="acceptDuo" data-id="${f.id}">Accepter</button><button class="btn small ghost" data-act="declineDuo" data-id="${f.id}">Refuser</button></div>`)
-      :duo?`<p class="muted" style="margin:0;font-size:13.5px">Série commune : <strong>${duoStreak(f,duo.start_date)} jour(s)</strong>. Elle compte un jour seulement si vous avez tous les deux fini votre journée (ou mis un gel).</p>
-        <button class="btn ghost block" data-act="askStopDuo" data-id="${f.id}">Arrêter le duo</button><div id="duoZone"></div>`
-      :`<p class="muted" style="margin:0;font-size:13.5px">Une série commune : si l'un de vous rate sa journée, vous la perdez tous les deux.</p>
-        <button class="btn block" data-act="startDuo" data-id="${f.id}">Proposer un duo à @${esc(f.pseudo)}</button>`}</div>
     <button class="btn danger block" data-act="askRemoveFriend" data-id="${f.id}">Retirer des amis</button><div id="rmZone"></div>`;
 }
 
 /* ---------- Classement ---------- */
-const SOLO_TIERS=[[90,'Prismatique','prism'],[60,'Diamant','diam'],[45,'Platine','plat'],[30,'Or','gold'],[20,'Argent','silver'],[10,'Bronze','bronze']];
-const GROUP_TIERS=[[90,'Aurore','aurora'],[60,'Glacier','glacier'],[30,'Banquise','pack'],[14,'Glace','ice'],[7,'Givre','frost']];
+const SOLO_TIERS=[[365,'Éternel','eternal'],[250,'Mythique','myth'],[190,'Légende','legend'],[150,'Grand Maître','gm'],[120,'Maître','master'],[90,'Prismatique','prism'],[60,'Diamant','diam'],[45,'Platine','plat'],[30,'Or','gold'],[20,'Argent','silver'],[10,'Bronze','bronze']];
+const GROUP_TIERS=[[365,'Zéro absolu','zero'],[250,'Pôle Nord','pole'],[190,'Tempête polaire','storm'],[120,'Blizzard','blizzard'],[90,'Aurore','aurora'],[60,'Glacier','glacier'],[30,'Banquise','pack'],[14,'Glace','ice'],[7,'Givre','frost']];
 function tierOf(n,list){ for(const t of list) if(n>=t[0]) return t; return null; }
 function nextTier(n,list){ let nx=null; for(const t of list) if(n<t[0]) nx=t; return nx; }
 function tierBadge(n,list){ const t=tierOf(n,list); return t?`<span class="tier t-${t[2]}">${t[1]}</span>`:''; }
 let boardTab='solo';
 const BOARD={solo:[],groups:[],at:0,err:'',loading:false};
 // Une série publiée hier reste valable seulement si la journée d'hier était finie
+// Série de groupe publiée : valable aujourd'hui, ou hier si la flamme n'était pas éteinte
+function grpEff(e){ const t=todayKey(); if(e.day===t) return e.streak||0; if(e.day===addDays(t,-1)) return ['up','stay','skip'].includes(e.st)?(e.streak||0):0; return 0; }
 function effStreak(n,day,done){ const t=todayKey(); if(day===t) return n||0; if(day===addDays(t,-1)) return done?(n||0):0; return 0; }
 async function loadBoard(force){
   if(!SOC.me||!SOC.sb||BOARD.loading) return;
@@ -1020,15 +1128,18 @@ async function loadBoard(force){
     if(a.error) throw a.error; if(b.error) throw b.error;
     BOARD.solo=(a.data||[]).map(r=>({id:r.id,pseudo:r.pseudo,streak:r.id===SOC.me.id?streak():effStreak(r.streak,r.day,r.done)}));
     if(!BOARD.solo.some(r=>r.id===SOC.me.id)) BOARD.solo.push({id:SOC.me.id,pseudo:SOC.me.pseudo,streak:streak()});
-    BOARD.groups=(b.data||[]).map(r=>{
-      const es=[r.ea,r.eb].filter(Boolean).sort((x,y)=>(y.day||'').localeCompare(x.day||''));
-      const e=es[0]; const n=e?effStreak(e.streak,e.day,e.both):0;
-      return {id:r.a+r.b, members:[r.pseudo_a,r.pseudo_b], mine:r.a===SOC.me.id||r.b===SOC.me.id, streak:n};
+    const gRows=b.data||[];
+    if(gRows.length && !('pseudos' in gRows[0])) throw new Error('script_v3');
+    const mg=myGroup();
+    BOARD.groups=gRows.map(r=>{
+      const es=(r.entries||[]).filter(Boolean).sort((x,y)=>(y.day||'').localeCompare(x.day||''));
+      const mine=!!(mg&&mg.id===r.id);
+      return {id:r.id, name:r.name, members:r.pseudos||[], mine, streak: mine?groupStreak(mg):(es[0]?grpEff(es[0]):0)};
     });
     BOARD.solo.sort((x,y)=>y.streak-x.streak||x.pseudo.localeCompare(y.pseudo));
     BOARD.groups.sort((x,y)=>y.streak-x.streak);
     BOARD.at=Date.now(); BOARD.err='';
-  }catch(e){ BOARD.err=errText(e); }
+  }catch(e){ BOARD.err=/script_v3/.test(String(e&&e.message))?'Il manque la mise à jour Supabase (script v3).':errText(e); }
   BOARD.loading=false;
   if(tab==='classement') render();
 }
@@ -1040,43 +1151,95 @@ function viewClassement(){
   const solo=boardTab==='solo';
   const rows = solo
     ? BOARD.solo.map(r=>({key:r.id,name:'@'+r.pseudo,avs:[r.pseudo],streak:r.streak,mine:r.id===SOC.me.id}))
-    : BOARD.groups.map(g=>({key:g.id,name:g.members.map(m=>'@'+m).join(' & '),avs:g.members,streak:g.streak,mine:g.mine}));
+    : BOARD.groups.map(g=>({key:g.id,name:g.name,sub:g.members.map(m=>'@'+m).join(', '),avs:g.members,streak:g.streak,mine:g.mine}));
   const TL = solo?SOLO_TIERS:GROUP_TIERS;
   const myRow = rows.find(r=>r.mine), myRank = myRow ? rows.indexOf(myRow)+1 : 0;
   const top=rows.slice(0,3), rest=rows.slice(3);
   const pod = i => { const r=top[i]; if(!r) return `<div class="pod p${i+1} empty-pod"><div class="block">${i+1}</div></div>`;
     return `<div class="pod p${i+1} ${r.mine?'mine':''}">
       ${i===0?'<span class="crown" aria-hidden="true">👑</span>':''}
-      <div class="avs">${r.avs.map(a=>avatar(a)).join('')}</div>
+      <div class="avs">${avStack(r.avs,3)}</div>
       <span class="pname">${esc(r.name)}</span>
       <span class="duo-n">${flameSVG(r.streak>0)}${r.streak}</span>${tierBadge(r.streak,TL)}
       <div class="block">${i+1}</div></div>`; };
-  const myN = solo ? streak() : (myRow?myRow.streak:0);
+  const myN = solo ? streak() : (myGroup()?groupStreak(myGroup()):0);
   const nx = nextTier(myN,TL), cur=tierOf(myN,TL);
   return `<div class="view">${head}
     <div class="seg" role="group" aria-label="Type de classement">
       <button data-act="boardTab" data-v="solo" aria-pressed="${solo}">Flammes solo</button>
       <button data-act="boardTab" data-v="groupes" aria-pressed="${!solo}">Flammes de groupe</button></div>
     <div class="card me-rank"><div class="row"><div style="flex:1;min-width:0">
-      <span class="label">${solo?'Ta série solo':'Ta meilleure série de groupe'}</span>
+      <span class="label">${solo?'Ta série solo':(myGroup()?'Ton groupe · '+esc(myGroup().name):'Ta série de groupe')}</span>
       <div class="row" style="gap:8px;margin-top:4px"><span class="duo-n big">${flameSVG(myN>0)}${myN}</span>${cur?`<span class="tier t-${cur[2]}">${cur[1]}</span>`:'<span class="muted" style="font-size:13px">Pas encore de grade</span>'}</div>
       ${nx?`<p class="muted" style="margin:6px 0 0;font-size:13px">${nx[1]} dans ${nx[0]-myN} jour${nx[0]-myN>1?'s':''}</p>`:'<p class="muted" style="margin:6px 0 0;font-size:13px">Grade maximum atteint</p>'}
       </div>${myRank?`<div class="rankno"><small>Place</small>#${myRank}</div>`:''}</div></div>
     ${BOARD.err?`<p class="err">${esc(BOARD.err)}</p>`:''}
     ${!BOARD.at&&!BOARD.err?'<p class="muted">Chargement du classement…</p>':''}
-    ${BOARD.at&&!rows.length?`<div class="card empty"><p class="muted">${solo?'Personne dans le classement pour l\'instant.':'Aucun duo actif. Propose un duo à un ami depuis l\'onglet Amis.'}</p></div>`:''}
+    ${BOARD.at&&!rows.length?`<div class="card empty"><p class="muted">${solo?'Personne dans le classement pour l\'instant.':'Aucun groupe actif. Crée un groupe depuis l\'onglet Amis.'}</p></div>`:''}
     ${rows.length?`<div class="podium">${pod(1)}${pod(0)}${pod(2)}</div>`:''}
-    ${rest.length?`<div class="list">${rest.map((r,i)=>`<div class="li rank ${r.mine?'me':''}"><span class="pos">${i+4}</span><div class="avs sm">${r.avs.map(a=>avatar(a)).join('')}</div>
-      <span class="t">${esc(r.name)}${r.mine?' <small class="muted">(toi)</small>':''}</span>${tierBadge(r.streak,TL)}<span class="duo-n">${flameSVG(r.streak>0)}${r.streak}</span></div>`).join('')}</div>`:''}
+    ${rest.length?`<div class="list">${rest.map((r,i)=>`<div class="li rank ${r.mine?'me':''}"><span class="pos">${i+4}</span><div class="avs sm">${avStack(r.avs,3)}</div>
+      <span class="t">${esc(r.name)}${r.mine?` <small class="muted">(${solo?'toi':'ton groupe'})</small>`:''}${r.sub?`<small class="muted" style="display:block;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.sub)}</small>`:''}</span>${tierBadge(r.streak,TL)}<span class="duo-n">${flameSVG(r.streak>0)}${r.streak}</span></div>`).join('')}</div>`:''}
     <div class="section"><div class="section-head"><span class="label">Les grades</span><button class="link" data-act="refreshBoard">Actualiser</button></div>
       <div class="chips">${TL.slice().reverse().map(t=>`<span class="tier t-${t[2]}">${t[1]} · ${t[0]} j</span>`).join('')}</div>
-      <p class="muted" style="margin:0;font-size:12.5px">${solo?'Ta série solo compte tes journées complètes d\'affilée, gels compris. Elle ne dépend que de toi.':'Une série de groupe avance seulement quand tout le groupe a fini sa journée.'}</p></div>
+      <p class="muted" style="margin:0;font-size:12.5px">${solo?'Ta série solo compte tes journées complètes d\'affilée, gels compris. Elle ne dépend que de toi.':'Groupes de 2 ou 3 : tout le monde doit finir sa journée au complet. Groupes de 4 et plus : si au moins la moitié a fini et le reste a fait une partie, la flamme stagne. Un seul qui ne fait rien et elle s\'éteint.'}</p></div>
   </div>`;
 }
 
 async function socialAction(act,el){
   const c=sbc(), id=el.dataset.id;
   switch(act){
+    case 'newGroup':
+      if(!SOC.v3){ toast('Il manque la mise à jour Supabase (script v3).'); return; }
+      GD={step:1,name:'',sel:[],prog:null}; openSheet(groupCreateHTML()); return;
+    case 'gPick': readGName(); if(GD.sel.includes(id)) GD.sel=GD.sel.filter(x=>x!==id); else if(GD.sel.length<9) GD.sel.push(id); else toast('9 amis maximum (10 avec toi)'); setSheet(groupCreateHTML()); return;
+    case 'gNext': readGName(); GD.step=2; setSheet(groupCreateHTML()); return;
+    case 'gBack': GD.step=1; setSheet(groupCreateHTML()); return;
+    case 'gProg': GD.prog=id; setSheet(groupCreateHTML()); return;
+    case 'gCreate': {
+      const p=S.programs.find(x=>x.id===GD.prog); if(!p||!GD.sel.length) return;
+      const prog={name:p.name,emoji:p.emoji,color:p.color,days:p.days||90,rules:p.rules.map(r=>({name:r.name,icon:isImg(r.icon)?'🎯':r.icon,color:r.color}))};
+      const gname=(GD.name||'').trim()||p.name;
+      SOC.busy=true; setSheet(groupCreateHTML());
+      try{
+        const {data,error}=await c.rpc('create_group',{gname,members:GD.sel,prog,start_on:todayKey()}); if(error) throw error;
+        if(S.arc) S.pastArcs.push({...S.arc,endedOn:todayKey()});
+        S.arc=arcFromGroup({id:data,name:gname,program:prog},todayKey()); save();
+        SOC.busy=false; closeSheet(true); tab='today'; await socialLoad(); render(); toast('Invitations envoyées. Ton défi de groupe commence.'); buzz([20,40,20]);
+      }catch(e){ SOC.busy=false; toast(errText(e)); setSheet(groupCreateHTML()); }
+      return; }
+    case 'joinGroup': {
+      const zone=document.getElementById('gz-'+id);
+      if(S.arc && S.arc.groupId!==id && zone){ zone.innerHTML=confirmBox('Rejoindre ce groupe ? Ton défi '+esc(S.arc.name)+' s\'arrête.','doJoinGroup" data-id="'+id,'Rejoindre'); return; }
+      socialAction('doJoinGroup',el); return; }
+    case 'doJoinGroup': {
+      const g=SOC.groups.find(x=>x.id===id); if(!g) return;
+      try{
+        const {error}=await c.rpc('accept_group',{gid:id,joined:todayKey()}); if(error) throw error;
+        if(S.arc) S.pastArcs.push({...S.arc,endedOn:todayKey()});
+        S.arc=arcFromGroup(g,todayKey()); save();
+        await socialLoad(); publishStats(); tab='today'; render(); toast('Bienvenue dans '+g.name+' 🔥'); buzz([20,40,20]);
+      }catch(e){ toast(errText(e)); }
+      return; }
+    case 'declineGroup':
+      try{ const {error}=await c.rpc('leave_group',{gid:id}); if(error) throw error; await socialLoad(); toast('Invitation refusée'); }
+      catch(e){ toast(errText(e)); }
+      return;
+    case 'groupSheet': { const g=SOC.groups.find(x=>x.id===id); if(g) openSheet(groupSheetHTML(g)); return; }
+    case 'askLeaveGroup': document.getElementById('leaveZone').innerHTML=confirmBox('Quitter le groupe ? Tu gardes le défi en solo, mais tu perds la flamme du groupe.','doLeaveGroup" data-id="'+id,'Quitter'); return;
+    case 'doLeaveGroup':
+      try{ const {error}=await c.rpc('leave_group',{gid:id}); if(error) throw error;
+        if(S.arc&&S.arc.groupId===id){ delete S.arc.groupId; save(); }
+        closeSheet(true); await socialLoad(); publishStats(); render(); toast('Tu as quitté le groupe'); }
+      catch(e){ toast(errText(e)); }
+      return;
+    case 'rename': {
+      const p=(document.getElementById('rename').value||'').trim().replace(/^@/,'');
+      if(p===SOC.me.pseudo) return;
+      if(p.length<2||p.length>10){ toast('Entre 2 et 10 caractères.'); return; }
+      if(!/^[\p{L}\p{N}_.\-]+$/u.test(p)){ toast('Lettres, chiffres, point, tiret et _ seulement.'); return; }
+      try{ const {error}=await c.from('profiles').update({pseudo:p}).eq('id',SOC.me.id); if(error) throw error; SOC.me.pseudo=p; setSheet(settingsHTML()); toast('Tu t\'appelles maintenant @'+p); loadBoard(true); }
+      catch(e){ toast(errText(e)); }
+      return; }
     case 'acceptDuo':
       try{ const {error}=await c.rpc('accept_duo',{fid:id,start_on:todayKey()}); if(error) throw error; await socialLoad(); publishStats(); toast('Duo accepté 🔥'); buzz([20,40,20]); if(sheetEl){ const f=SOC.friends.find(x=>x.id===id); if(f) setSheet(friendSheetHTML(f)); } }
       catch(e){ toast(errText(e)); }
@@ -1103,7 +1266,7 @@ async function socialAction(act,el){
     case 'refreshBoard': await publishStats(); await loadBoard(true); return;
     case 'signup': {
       const p=(document.getElementById('pseudo').value||'').trim().replace(/^@/,''); SOC.pseudoDraft=p;
-      if(p.length<2){ SOC.err='Ton pseudo doit faire au moins 2 caractères.'; render(); return; }
+      if(p.length<2||p.length>10){ SOC.err='Ton pseudo doit faire entre 2 et 10 caractères.'; render(); return; }
       if(!/^[\p{L}\p{N}_.\-]+$/u.test(p)){ SOC.err='Lettres, chiffres, point, tiret et _ seulement.'; render(); return; }
       if(!c){ SOC.err='Connexion au serveur impossible.'; render(); return; }
       SOC.busy=true; SOC.err=''; render();
@@ -1133,24 +1296,89 @@ async function socialAction(act,el){
       SOC.busy=false; render(); return; }
     case 'refreshSocial': await publishStats(); await socialLoad(); toast('À jour'); return;
     case 'friend': { const f=SOC.friends.find(x=>x.id===id); if(f) openSheet(friendSheetHTML(f)); return; }
-    case 'startDuo':
-      try{ const {error}=await c.rpc('start_duo',{fid:id,start_on:todayKey()}); if(error) throw error; await socialLoad(); const f=SOC.friends.find(x=>x.id===id); if(f) setSheet(friendSheetHTML(f)); toast(duoWith(id)&&duoWith(id).status==='active'?'Duo lancé 🔥':'Demande de duo envoyée'); buzz(30); }
-      catch(e){ toast(errText(e)); }
-      return;
-    case 'askStopDuo': document.getElementById('duoZone').innerHTML=confirmBox('Arrêter le duo ? La série commune sera perdue.','doStopDuo" data-id="'+id,'Arrêter'); return;
-    case 'doStopDuo': {
-      const me=SOC.me.id;
-      try{ const {error}=await c.from('duos').delete().eq('a',me<id?me:id).eq('b',me<id?id:me); if(error) throw error; await socialLoad(); const f=SOC.friends.find(x=>x.id===id); if(f) setSheet(friendSheetHTML(f)); toast('Duo arrêté'); }
-      catch(e){ toast(errText(e)); }
-      return; }
-    case 'askRemoveFriend': document.getElementById('rmZone').innerHTML=confirmBox('Retirer cet ami ? Votre duo s\'arrête aussi.','doRemoveFriend" data-id="'+id,'Retirer'); return;
+    case 'askRemoveFriend': document.getElementById('rmZone').innerHTML=confirmBox('Retirer cet ami ?','doRemoveFriend" data-id="'+id,'Retirer'); return;
     case 'doRemoveFriend':
       try{ const {error}=await c.rpc('remove_friend',{fid:id}); if(error) throw error; closeSheet(true); await socialLoad(); toast('Ami retiré'); }
       catch(e){ toast(errText(e)); }
       return;
   }
 }
-const SOCIAL_ACTS=['acceptDuo','declineDuo','setVis','tglViewer','boardTab','refreshBoard','signup','copyCode','shareInvite','addFriend','refreshSocial','friend','startDuo','askStopDuo','doStopDuo','askRemoveFriend','doRemoveFriend'];
+const SOCIAL_ACTS=['newGroup','gPick','gNext','gBack','gProg','gCreate','joinGroup','doJoinGroup','declineGroup','groupSheet','askLeaveGroup','doLeaveGroup','rename','setVis','tglViewer','boardTab','refreshBoard','signup','copyCode','shareInvite','addFriend','refreshSocial','friend','askRemoveFriend','doRemoveFriend'];
+
+/* ---------- Fin de défi ---------- */
+// Le lendemain du dernier jour, une fenêtre demande quoi faire : continuer, remplacer ou arrêter
+function endedItems(){
+  const t=todayKey(), out=[];
+  if(S.arc && t>arcEnd(S.arc)) out.push({type:'arc',id:S.arc.id});
+  S.challenges.forEach(c=>{ if(c.start && diffDays(c.start,t)>=chDays(c)) out.push({type:'ch',id:c.id}); });
+  return out;
+}
+let endOpen=false, endGo=null;
+function endHTML(){
+  const items=endedItems();
+  const block=(it)=>{
+    let ico,name,col,txt;
+    if(it.type==='arc'){ const a=S.arc; let full=0; for(let i=0;i<a.days;i++) if(dayInfo(addDays(a.start,i)).full) full++;
+      ico=esc(a.emoji); name=a.name; col=a.color; txt=`${a.days} jours terminés · ${full} jour${full>1?'s':''} parfait${full>1?'s':''}.${a.groupId?' Défi de groupe.':''} Tes photos sont révélées dans Progrès.`; }
+    else { const c=S.challenges.find(x=>x.id===it.id); let got=0; for(let i=0;i<chDays(c);i++) if(isDone(addDays(c.start,i),'c:'+c.id)) got++;
+      ico=icon(c.icon); name=c.name; col=c.color; txt=`${chDays(c)} jours terminés · tenu ${got}/${chDays(c)}.`; }
+    return `<div class="card end-item" style="--c:${col}"><div class="ch" style="--c:${col}"><div class="ico">${ico}</div><div class="body"><h3>${esc(name)}</h3><p>${txt}</p></div></div>
+      <div class="seg" role="group" aria-label="Que faire avec ${esc(name)}">
+        <button data-act="endDo" data-type="${it.type}" data-id="${it.id}" data-v="cont">Continuer</button>
+        <button data-act="endDo" data-type="${it.type}" data-id="${it.id}" data-v="repl">Remplacer</button>
+        <button data-act="endDo" data-type="${it.type}" data-id="${it.id}" data-v="stop">Arrêter</button></div></div>`;
+  };
+  return `<h2>${items.length>1?'Défis terminés 🎉':'Défi terminé 🎉'}</h2>
+    <p class="muted" style="margin:0;font-size:13.5px">Continuer : le même défi repart au jour 1 aujourd'hui. Remplacer : tu en choisis un autre. Arrêter : il s'arrête. Ta flamme continue tant que tu as des tâches à faire chaque jour.</p>
+    ${items.map(block).join('')}`;
+}
+function checkEnds(){
+  if(endedItems().length){
+    if(!endOpen){ openSheet(endHTML()); endOpen=true; }
+    else setSheet(endHTML());
+  } else if(endOpen){ endOpen=false; closeSheet(true); }
+}
+function endDo(type,id,v){
+  const t=todayKey();
+  if(type==='arc' && S.arc){
+    const a=S.arc; S.pastArcs.push({...a,endedOn:arcEnd(a)});
+    if(v==='cont'){ S.arc={...a,id:uid(),start:t}; }
+    else { leaveGroupQuiet(a.groupId); S.arc=null; if(v==='repl') endGo='90'; }
+  } else if(type==='ch'){
+    const c=S.challenges.find(x=>x.id===id); if(!c) return;
+    if(v==='cont') c.start=t; else { c.start=null; if(v==='repl') endGo=String(chDays(c)); }
+  }
+  save();
+  if(endedItems().length){ setSheet(endHTML()); return; }
+  endOpen=false; closeSheet(true);
+  if(endGo){ tab='defis'; defisTab=endGo; endGo=null; toast('Choisis ton nouveau défi'); }
+  else toast(v==='cont'?'C\'est reparti, jour 1 !':'C\'est noté');
+  render(); window.scrollTo({top:0});
+}
+
+/* ---------- Défis passés : photos ---------- */
+function pastArcHTML(a){
+  const end=a.endedOn||arcEnd(a);
+  return `<div class="row"><h2>${esc(a.emoji)} ${esc(a.name)}</h2><span class="spacer"></span><button class="btn small ghost" data-act="closeSheet">Fermer</button></div>
+    <p class="muted" style="margin:0;font-size:13.5px">Du ${niceDate(a.start)} au ${niceDate(end)}.</p>
+    <div class="gallery" id="pastGallery"></div>`;
+}
+async function fillPastGallery(a){
+  const g=document.getElementById('pastGallery'); if(!g) return;
+  const end=a.endedOn||arcEnd(a);
+  const keys=Object.keys(S.log).filter(k=>S.log[k].photo && k>=a.start && k<=end).sort();
+  if(!keys.length){ g.outerHTML='<p class="muted" style="margin:0">Pas de photo pour ce défi.</p>'; return; }
+  g.innerHTML=keys.map(k=>`<div data-k="${k}"><span>J${diffDays(a.start,k)+1}</span></div>`).join('');
+  for(const k of keys){ const src=await getPhoto(a.id+':'+k); const box=g.querySelector(`[data-k="${k}"]`); if(src&&box) box.insertAdjacentHTML('afterbegin',`<img src="${src}" alt="Photo du jour ${diffDays(a.start,k)+1}">`); }
+}
+function pastArcsSection(){
+  const nph=a=>Object.keys(S.log).filter(k=>S.log[k].photo && k>=a.start && k<=(a.endedOn||arcEnd(a))).length;
+  const list=(S.pastArcs||[]).filter(a=>a&&a.start&&((a.endedOn||arcEnd(a))>a.start||nph(a))).slice().reverse();
+  if(!list.length) return '';
+  return `<div class="section"><span class="label">Défis passés</span><div class="list">${list.map(a=>{
+    const n=nph(a);
+    return `<button class="li" style="text-align:left" data-act="pastArc" data-id="${a.id}"><span class="e" style="background:color-mix(in oklab,${a.color} 22%,transparent)">${esc(a.emoji)}</span><span class="t">${esc(a.name)}<small class="muted" style="display:block;font-weight:500">${niceDate(a.start)} · ${n} photo${n>1?'s':''}</small></span></button>`; }).join('')}</div></div>`;
+}
 
 /* ---------- Feuilles ---------- */
 let sheetEl=null, scrimEl=null;
@@ -1252,6 +1480,7 @@ function settingsHTML(){
         <button data-act="theme" data-v="dark" aria-pressed="${S.theme==='dark'}">Sombre</button>
         <button data-act="theme" data-v="light" aria-pressed="${S.theme==='light'}">Clair</button>
         <button data-act="theme" data-v="auto" aria-pressed="${S.theme==='auto'}">Auto</button></div></div>
+    ${SOC.me?`<div class="field"><label class="label" for="rename">Pseudo (10 caractères max)</label><div class="row"><input id="rename" maxlength="10" autocomplete="off" autocapitalize="off" value="${esc(SOC.me.pseudo)}" style="flex:1;min-width:0"><button class="btn small" data-act="rename">Renommer</button></div></div>`:''}
     ${privacyHTML()}
     <div class="li"><span class="t">Vibrations</span><button class="switch" role="switch" aria-checked="${S.haptics}" data-act="tgl" data-v="haptics" aria-label="Vibrations"></button></div>
     <div class="li"><span class="t">Sons</span><button class="switch" role="switch" aria-checked="${S.sound}" data-act="tgl" data-v="sound" aria-label="Sons"></button></div>
@@ -1298,6 +1527,7 @@ let pendingProgram=null;
 document.addEventListener('click', async (ev)=>{
   const el=ev.target.closest('[data-act]'); if(!el) return;
   const act=el.dataset.act, id=el.dataset.id;
+  if(endOpen && act!=='endDo') return;
   if(SOCIAL_ACTS.includes(act)){ socialAction(act,el); return; }
   switch(act){
     case 'tab': tab=id; closeSheet(true); render(); window.scrollTo({top:0}); if(id==='classement') loadBoard(); break;
@@ -1310,12 +1540,14 @@ document.addEventListener('click', async (ev)=>{
     case 'tgl': S[el.dataset.v]=!S[el.dataset.v]; save(); el.setAttribute('aria-checked',S[el.dataset.v]); break;
     case 'photo': document.getElementById('photoInput').click(); break;
     case 'day': openSheet(dayHTML(el.dataset.k)); break;
+    case 'endDo': endDo(el.dataset.type,id,el.dataset.v); break;
+    case 'pastArc': { const a=(S.pastArcs||[]).find(x=>x.id===id); if(a){ openSheet(pastArcHTML(a)); fillPastGallery(a); } break; }
 
     case 'pickProgram': {
       const p=S.programs.find(x=>x.id===id); if(!p) break;
       openSheet(`<h2>${esc(p.emoji)} ${esc(p.name)}</h2>${p.desc?`<p class="muted" style="margin:0">${esc(p.desc)}</p>`:''}
         <div class="chips">${p.rules.map(r=>`<span class="chip">${icon(r.icon)} ${esc(r.name)}</span>`).join('')||'<span class="muted">Aucune règle</span>'}</div>
-        <p class="muted" style="margin:0;font-size:13.5px">${p.days||90} jours. Tu pourras modifier toutes les règles ensuite.${S.arc?' Il remplace ton défi actuel ('+esc(S.arc.name)+').':''}</p>
+        <p class="muted" style="margin:0;font-size:13.5px">${p.days||90} jours. Tu pourras modifier toutes les règles ensuite.${S.arc?' Il remplace ton défi actuel ('+esc(S.arc.name)+')'+(S.arc.groupId?' et tu quittes ton groupe':'')+'.':''}</p>
         <button class="btn block" data-act="startProgram" data-id="${p.id}" ${p.rules.length?'':'disabled'}>Commencer aujourd'hui</button>
         <button class="btn ghost block" data-act="editProg" data-id="${p.id}">Modifier</button>`);
       break; }
@@ -1331,14 +1563,14 @@ document.addEventListener('click', async (ev)=>{
     case 'editProg': editTarget=id; openSheet(arcEditorHTML()); break;
     case 'startProgram': {
       const p=S.programs.find(x=>x.id===id); if(!p||!p.rules.length) break;
-      if(S.arc) S.pastArcs.push({...S.arc, endedOn:todayKey()});
+      if(S.arc){ S.pastArcs.push({...S.arc, endedOn:todayKey()}); leaveGroupQuiet(S.arc.groupId); }
       S.arc=arcFromProgram(p);
       save(); closeSheet(true); tab='today'; render(); toast(p.name+' lancé. Jour 1 !'); break; }
     case 'customArc': {
       const p={id:uid(),name:'Mon programme',emoji:'🎯',color:'#3b82f6',desc:'',days:90,rules:[]};
       S.programs.push(p); save(); render(); editTarget=p.id; openSheet(arcEditorHTML()); break; }
-    case 'askStopArc': document.getElementById('stopArcZone').innerHTML=confirmBox('Arrêter '+esc(S.arc.name)+' ? Les petits défis continuent.','doStopArc','Arrêter le défi'); break;
-    case 'doStopArc': S.pastArcs.push({...S.arc,endedOn:todayKey()}); S.arc=null; save(); closeSheet(true); render(); toast('Défi arrêté'); break;
+    case 'askStopArc': document.getElementById('stopArcZone').innerHTML=confirmBox('Arrêter '+esc(S.arc.name)+' ?'+(S.arc.groupId?' Tu quittes aussi ton groupe.':'')+' Les petits défis continuent.','doStopArc','Arrêter le défi'); break;
+    case 'doStopArc': S.pastArcs.push({...S.arc,endedOn:todayKey()}); leaveGroupQuiet(S.arc.groupId); S.arc=null; save(); closeSheet(true); render(); toast('Défi arrêté'); break;
     case 'editArc': editTarget='arc'; openSheet(arcEditorHTML()); break;
     case 'arcColor': { const a=tgt(); readArcMeta(a); a.color=el.dataset.v; save(); setSheet(arcEditorHTML()); render(); break; }
     case 'saveArcMeta': { readArcMeta(tgt()); save(); toast('Enregistré'); setSheet(arcEditorHTML()); render(); break; }
@@ -1455,17 +1687,17 @@ document.getElementById('photoInput').addEventListener('change', async (e)=>{
   }catch(err){ toast('Impossible de lire cette photo'); }
 });
 
-document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; if(tab==='today') render(); if(SOC.me){ publishStats(); socialLoad(); } });
-document.addEventListener('keydown',e=>{ if(e.key==='Escape' && sheetEl){ closeSheet(); render(); } });
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; if(tab==='today') render(); checkEnds(); if(SOC.me){ publishStats(); socialLoad(); } });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && sheetEl && !endOpen){ closeSheet(); render(); } });
 
 // Hors connexion (seulement quand l'appli est hébergée normalement)
 if('serviceWorker' in navigator && location.protocol==='https:' && !/claude|anthropic|usercontent/.test(location.hostname)){
   navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
 
-load(); applyTheme(); render();
+load(); applyTheme(); render(); checkEnds();
 socialInit().then(()=>{ if(tab==='amis'||tab==='today') render(); });
-setInterval(()=>{ if(SOC.me && !document.hidden) socialLoad(); }, 60000);
+setInterval(()=>{ if(document.hidden) return; checkEnds(); if(SOC.me) socialLoad(); }, 60000);
 })();
 </script>
 
