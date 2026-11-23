@@ -112,3 +112,10 @@ grant execute on function public.add_friend(text) to authenticated;
 grant execute on function public.remove_friend(uuid) to authenticated;
 grant execute on function public.start_duo(uuid, date) to authenticated;
 grant execute on function public.is_friend(uuid) to authenticated;
+
+-- Droits d'accès des utilisateurs connectés (les nouveaux projets Supabase ne les donnent pas tout seuls)
+grant usage on schema public to authenticated;
+grant select, insert, update on public.profiles to authenticated;
+grant select on public.friends to authenticated;
+grant select, insert, update on public.stats to authenticated;
+grant select, delete on public.duos to authenticated;
