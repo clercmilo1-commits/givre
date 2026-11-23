@@ -522,6 +522,25 @@ function toNextGel(){
   for(let i=0;i<3000 && k<=t;i++){ const d=dayInfo(k); if(d.full) run++; else if(!d.frozen && k!==t) run=0; k=addDays(k,1); }
   return 10-(run%10);
 }
+// Gel automatique : si des jours passés cassent une série en cours, on les gèle avec les gels en stock.
+// Rien si aucune série n'était en cours, si ces jours n'avaient aucune tâche, ou s'il n'y a pas assez de gels pour tout couvrir.
+function autoFreeze(){
+  const t=todayKey(), first=firstKey(), gap=[];
+  let k=addDays(t,-1), before=false;
+  for(let i=0;i<60 && k>=first;i++){
+    const d=dayInfo(k);
+    if(d.full||d.frozen){ before=true; break; }
+    if(!d.total) return 0;
+    gap.push(k); k=addDays(k,-1);
+  }
+  if(!before || !gap.length || gap.length>gelsLeft()) return 0;
+  gap.forEach(x=>S.frozen[x]=1); save();
+  return gap.length;
+}
+function runAutoFreeze(){
+  const n=autoFreeze();
+  if(n){ render(); setTimeout(()=>toast(`❄️ ${n} gel${n>1?'s':''} utilisé${n>1?'s':''} automatiquement : ta série est sauvée`),400); }
+}
 function isDone(k,key){ const L=S.log[k]; return !!(L&&L.done&&L.done[key]); }
 function setDone(k,key,val){
   const L=S.log[k]||(S.log[k]={done:{}});
@@ -791,7 +810,7 @@ function viewProgres(){
       <p class="muted" style="margin:0;font-size:12.5px">Touche un jour passé pour cocher un oubli, ou un jour à venir pour le geler.</p>
     </div>
     <div class="card gel-card"><div class="row"><span class="gel-ico">❄️</span><div style="flex:1;min-width:0"><h3 style="font-size:17px">Gels de série : ${gelsLeft()}</h3>
-      <p class="muted" style="margin:2px 0 0;font-size:13px">1 gel gagné tous les 10 jours complets d'affilée. Encore ${toNextGel()} jour${toNextGel()>1?'s':''} pour le prochain. Un gel protège ta série un jour où tu ne peux pas tout faire (vacances, malade).</p></div></div></div>
+      <p class="muted" style="margin:2px 0 0;font-size:13px">1 gel gagné tous les 10 jours complets d'affilée. S'il te reste un gel et que tu rates un jour, il est utilisé tout seul pour sauver ta série. Encore ${toNextGel()} jour${toNextGel()>1?'s':''} pour le prochain. Un gel protège ta série un jour où tu ne peux pas tout faire (vacances, malade).</p></div></div></div>
     <div class="stats">
       <div class="stat"><span class="label">Complétion</span><span class="v">${pct} %</span></div>
       <div class="stat"><span class="label">Jours parfaits</span><span class="v">${full}</span></div>
@@ -1687,7 +1706,7 @@ document.getElementById('photoInput').addEventListener('change', async (e)=>{
   }catch(err){ toast('Impossible de lire cette photo'); }
 });
 
-document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; if(tab==='today') render(); checkEnds(); if(SOC.me){ publishStats(); socialLoad(); } });
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; if(tab==='today') render(); runAutoFreeze(); checkEnds(); if(SOC.me){ publishStats(); socialLoad(); } });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape' && sheetEl && !endOpen){ closeSheet(); render(); } });
 
 // Hors connexion (seulement quand l'appli est hébergée normalement)
@@ -1695,9 +1714,9 @@ if('serviceWorker' in navigator && location.protocol==='https:' && !/claude|anth
   navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
 
-load(); applyTheme(); render(); checkEnds();
+load(); applyTheme(); render(); runAutoFreeze(); checkEnds();
 socialInit().then(()=>{ if(tab==='amis'||tab==='today') render(); });
-setInterval(()=>{ if(document.hidden) return; checkEnds(); if(SOC.me) socialLoad(); }, 60000);
+setInterval(()=>{ if(document.hidden) return; runAutoFreeze(); checkEnds(); if(SOC.me) socialLoad(); }, 60000);
 })();
 </script>
 
