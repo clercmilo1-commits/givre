@@ -190,6 +190,20 @@ h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:-.
 .wd.frozen i{background:var(--frost);border-color:transparent}
 .gel-won{position:relative;font-weight:700;padding:8px 14px;border-radius:99px;background:color-mix(in oklab,var(--frost) 30%,transparent);border:1px solid var(--frost)}
 
+/* Amis */
+.av{width:36px;height:36px;border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;font-weight:700;font-family:var(--display)}
+.duo{display:flex;flex-direction:column;gap:8px;width:100%;padding:14px;border-radius:18px;background:linear-gradient(135deg,color-mix(in oklab,var(--flame-b) 16%,var(--surface)),var(--surface));border:1px solid color-mix(in oklab,var(--flame-b) 35%,var(--line))}
+.duo-n{display:inline-flex;align-items:center;gap:4px;font-family:var(--display);font-weight:800;font-size:18px;font-variant-numeric:tabular-nums}
+.duo-n svg{width:22px;height:22px}
+.ok{color:var(--ok);font-weight:600}
+.nudge{margin:0;font-size:13px;font-weight:600;color:var(--flame-a);text-align:left}
+.err{margin:0;color:#f87171;font-size:13.5px;font-weight:500}
+.code{font-family:var(--display);font-weight:800;font-size:30px;letter-spacing:.18em}
+.code-in{flex:1;min-width:0;min-height:42px;padding:8px 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);font-size:17px;letter-spacing:.15em;text-transform:uppercase}
+.rank{width:100%;text-align:left}
+.rank .pos{width:22px;font-family:var(--display);font-weight:800;color:var(--muted);text-align:center;flex:none}
+.rank.me{border-color:color-mix(in oklab,var(--ice) 45%,var(--line))}
+
 /* Navigation */
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:8px max(12px,env(safe-area-inset-left,0px)) calc(8px + env(safe-area-inset-bottom,0px));
   background:color-mix(in oklab,var(--bg) 82%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--line)}
@@ -274,6 +288,7 @@ h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:-.
 <input type="file" id="photoInput" accept="image/*" capture="user" hidden>
 <input type="file" id="iconInput" accept="image/*" hidden>
 
+<script src="supabase.js"></script>
 <script>
 (function(){
 "use strict";
@@ -372,7 +387,7 @@ function load(){
   try{ const raw=localStorage.getItem(LS_KEY); if(raw){ S=JSON.parse(raw); if(S&&S.v===1){ migrate(); return; } } }catch(e){}
   S=freshState(); save();
 }
-function save(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); }catch(e){} }
+function save(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); }catch(e){} try{ schedulePublish(); }catch(e){} }
 
 // Photos : IndexedDB, avec repli en mémoire
 const mem = {};
@@ -584,6 +599,7 @@ function viewToday(){
       <div class="streak ${st?'':'off'}" id="streak">${flameSVG(st>0)}<span id="streakN">${st}</span><small>jour${st>1?'s':''} de série</small></div>
       ${week}
     </section>
+    ${duoCardsHome()}
     <section class="section">
       <div class="section-head"><h2 style="font-size:20px">Aujourd'hui</h2><span class="muted" style="font-size:13px">${niceDate(k)}</span></div>
       <div class="daybar"><div class="bar"><b id="dayBar"></b></div><span class="count" id="dayCount">0/0</span></div>
@@ -724,18 +740,240 @@ async function fillGallery(){
   g.innerHTML = keys.map(k=>`<div data-k="${k}">${ended?'':`<span style="position:static;color:var(--muted);text-shadow:none">${I.lock.replace('<svg','<svg width="22" height="22"')}</span>`}<span>J${diffDays(a.start,k)+1}</span></div>`).join('');
   if(ended){ for(const k of keys){ const src=await getPhoto(a.id+':'+k); const box=g.querySelector(`[data-k="${k}"]`); if(src&&box) box.insertAdjacentHTML('afterbegin',`<img src="${src}" alt="Photo du jour ${diffDays(a.start,k)+1}">`); } }
 }
-function viewAmis(){
-  return `<div class="view">${topbar('Amis')}
-    <div class="card"><span class="pill" style="align-self:flex-start">Prochaine étape</span>
-      <h2 style="font-size:21px">Faire ton arc avec tes potes</h2>
-      <p class="muted" style="margin:0">Cette partie arrive dans la prochaine version. Elle demande un petit serveur pour que vos téléphones se parlent.</p>
-      <div class="list">
-        <div class="li"><span class="e" style="background:color-mix(in oklab,#f97316 20%,transparent)">🔥</span><span class="t">Duo : une série commune, perdue si l'un de vous rate sa journée</span></div>
-        <div class="li"><span class="e" style="background:color-mix(in oklab,#3b82f6 20%,transparent)">📅</span><span class="t">Voir le calendrier et la progression de tes amis</span></div>
-        <div class="li"><span class="e" style="background:color-mix(in oklab,#d97706 20%,transparent)">🏆</span><span class="t">Classement entre amis</span></div>
-        <div class="li"><span class="e" style="background:color-mix(in oklab,#22c55e 20%,transparent)">🔗</span><span class="t">Connexion avec un pseudo et un code, sans vrai compte</span></div>
-      </div></div></div>`;
+/* ---------- Amis (Supabase) ---------- */
+const SUPA_URL='https://cnoaizuvnfaavjgnxubi.supabase.co';
+const SUPA_KEY='sb_publishable_CHGHNNkyziFdBv_6GqS-cQ_0zR7dnx3';
+const SOC={sb:null, me:null, ready:false, busy:false, err:'', friends:[], duos:[], loaded:false, pendingCode:null};
+try{ const q=new URLSearchParams(location.search).get('ami'); if(q) SOC.pendingCode=q.toUpperCase().slice(0,12); }catch(e){}
+function sbc(){
+  if(SOC.sb) return SOC.sb;
+  if(!window.supabase||!window.supabase.createClient) return null;
+  try{ SOC.sb=window.supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{persistSession:true,autoRefreshToken:true,storageKey:'givre-auth'}}); }catch(e){ return null; }
+  return SOC.sb;
 }
+function errText(e){
+  const m=String((e&&(e.message||e.error_description))||e||'');
+  if(/code_inconnu/.test(m)) return 'Aucun ami avec ce code. Vérifie les lettres.';
+  if(/ton_code/.test(m)) return 'C\'est ton propre code.';
+  if(/pas_ami/.test(m)) return 'Ajoute-le d\'abord en ami.';
+  if(/anonymous/i.test(m)&&/disabled/i.test(m)) return 'Active « Allow anonymous sign-ins » dans Supabase (Authentication).';
+  if(/profiles_pseudo_lower|duplicate key/.test(m)) return 'Ce pseudo est déjà pris. Choisis-en un autre.';
+  if(/relation .* does not exist|schema cache/i.test(m)) return 'Le script SQL n\'a pas encore été lancé dans Supabase.';
+  if(/Failed to fetch|NetworkError|network/i.test(m)) return 'Pas de connexion internet.';
+  return 'Erreur : '+m.slice(0,120);
+}
+async function socialInit(){
+  const c=sbc();
+  if(!c){ SOC.err='Connexion au serveur impossible pour l\'instant.'; SOC.ready=true; return; }
+  try{
+    const {data:{session}}=await c.auth.getSession();
+    if(session){
+      const {data,error}=await c.from('profiles').select('*').eq('id',session.user.id).maybeSingle();
+      if(error) throw error;
+      SOC.me=data||null;
+    }
+    SOC.err='';
+  }catch(e){ SOC.err=errText(e); }
+  SOC.ready=true;
+  if(SOC.me){ await socialLoad(); publishStats(); await usePendingCode(); }
+}
+async function usePendingCode(){
+  if(!SOC.me||!SOC.pendingCode) return;
+  const code=SOC.pendingCode; SOC.pendingCode=null;
+  try{ history.replaceState(null,'',location.pathname); }catch(e){}
+  try{ const {data,error}=await SOC.sb.rpc('add_friend',{code}); if(error) throw error; toast((data&&data.pseudo?'@'+data.pseudo:'Ton pote')+' est maintenant ton ami'); await socialLoad(); }
+  catch(e){ toast(errText(e)); }
+}
+async function socialLoad(){
+  const c=SOC.sb, me=SOC.me; if(!c||!me) return;
+  try{
+    const {data:fr,error:e1}=await c.from('friends').select('friend_id').eq('user_id',me.id); if(e1) throw e1;
+    const ids=(fr||[]).map(x=>x.friend_id);
+    let profs=[], st=[];
+    if(ids.length){
+      const [p,s]=await Promise.all([c.from('profiles').select('id,pseudo').in('id',ids), c.from('stats').select('user_id,data,updated_at').in('user_id',ids)]);
+      profs=p.data||[]; st=s.data||[];
+    }
+    SOC.friends=ids.map(id=>({id, pseudo:(profs.find(p=>p.id===id)||{}).pseudo||'?', data:(st.find(s=>s.user_id===id)||{}).data||null}));
+    const {data:d}=await c.from('duos').select('*'); SOC.duos=d||[];
+    SOC.loaded=true; SOC.err='';
+  }catch(e){ SOC.err=errText(e); }
+  const ae=document.activeElement;
+  if((tab==='amis'||tab==='today') && !(ae && /INPUT|TEXTAREA/.test(ae.tagName))) render();
+}
+function histMap(n){
+  const out={}, first=firstKey(); let k=todayKey();
+  for(let i=0;i<n && k>=first;i++){ const d=dayInfo(k); out[k]=d.full?'f':(d.frozen?'z':(d.part?'p':(d.total?'m':'-'))); k=addDays(k,-1); }
+  return out;
+}
+function myStats(){
+  const k=todayKey(), di=dayInfo(k), a=S.arc;
+  return {v:1, at:Date.now(), day:k,
+    arc:a?{name:a.name,emoji:a.emoji,days:a.days,start:a.start,day:inArc(k)?arcDay(k):null}:null,
+    streak:streak(), best:bestStreak(), gels:gelsLeft(),
+    today:{done:di.done,total:di.total,full:di.full||di.frozen},
+    hist:histMap(150),
+    ch:S.challenges.filter(c=>chActive(c,k)).map(c=>({name:c.name,icon:isImg(c.icon)?'💪':c.icon,day:diffDays(c.start,k)+1}))};
+}
+let pubT=null;
+function schedulePublish(){ if(!SOC.me) return; clearTimeout(pubT); pubT=setTimeout(publishStats,1500); }
+async function publishStats(){
+  if(!SOC.me||!SOC.sb) return;
+  try{ await SOC.sb.from('stats').upsert({user_id:SOC.me.id,data:myStats(),updated_at:new Date().toISOString()}); }catch(e){}
+}
+const fState = (f,k) => (f.data&&f.data.hist&&f.data.hist[k])||'';
+const fOk = (f,k) => { const s=fState(f,k); return s==='f'||s==='z'; };
+function friendToday(f){
+  const d=f.data; if(!d||d.day!==todayKey()) return {seen:false,full:false,done:0,total:0};
+  return {seen:true,full:!!d.today.full,done:d.today.done,total:d.today.total};
+}
+function friendStreak(f){
+  // La série du pote est recalculée avec son historique, pour qu'elle soit juste même s'il n'a pas ouvert l'appli aujourd'hui
+  if(!f.data||!f.data.hist) return 0;
+  let k=todayKey(), n=0; if(fOk(f,k)) n++; k=addDays(k,-1);
+  for(let i=0;i<400;i++){ if(fOk(f,k)){n++;k=addDays(k,-1);} else break; }
+  return n;
+}
+function duoWith(fid){ const me=SOC.me&&SOC.me.id; return SOC.duos.find(d=>(d.a===me&&d.b===fid)||(d.b===me&&d.a===fid)); }
+function duoStreak(f,start){
+  const both=k=>okDay(k)&&fOk(f,k);
+  let k=todayKey(), n=0; if(both(k)) n++; k=addDays(k,-1);
+  for(let i=0;i<400 && k>=start;i++){ if(both(k)){n++;k=addDays(k,-1);} else break; }
+  return n;
+}
+function avatar(p){ const ch=(p||'?').trim().charAt(0).toUpperCase(); let h=0; for(const c of p||'') h=(h*31+c.charCodeAt(0))%360;
+  return `<span class="av" style="background:hsl(${h} 55% 45%)">${esc(ch)}</span>`; }
+
+function duoCardsHome(){
+  if(!SOC.me||!SOC.duos.length) return '';
+  const rows=SOC.duos.map(d=>{
+    const fid=d.a===SOC.me.id?d.b:d.a, f=SOC.friends.find(x=>x.id===fid); if(!f) return '';
+    const n=duoStreak(f,d.start_date), ft=friendToday(f), mine=dayInfo(todayKey());
+    const fs = ft.full?'<b class="ok">a fini sa journée ✓</b>':(ft.seen?`en est à ${ft.done}/${ft.total}`:'n\'a pas encore ouvert l\'appli aujourd\'hui');
+    const nudge = ft.full && !(mine.full||mine.frozen) ? '<p class="nudge">Ton pote a tout fait. Ne lui fais pas perdre la série.</p>' : '';
+    return `<button class="duo" data-act="friend" data-id="${f.id}">
+      <div class="row">${avatar(f.pseudo)}<div style="flex:1;min-width:0;text-align:left"><strong>Duo avec @${esc(f.pseudo)}</strong><span class="muted" style="display:block;font-size:13px">@${esc(f.pseudo)} ${fs}</span></div>
+      <span class="duo-n">${flameSVG(n>0)}${n}</span></div>${nudge}</button>`;
+  }).join('');
+  return `<section class="section"><span class="label">Tes duos</span>${rows}</section>`;
+}
+
+function viewAmis(){
+  const head=topbar('Amis');
+  if(!SOC.ready) return `<div class="view">${head}<div class="card empty"><p class="muted">Connexion…</p></div></div>`;
+  if(!SOC.me){
+    return `<div class="view">${head}
+      <div class="card"><h2 style="font-size:21px">Choisis ton pseudo</h2>
+        <p class="muted" style="margin:0">Pas d'email, pas de mot de passe. Tes amis te verront avec ce pseudo, et verront ta série et ton calendrier. Tes photos restent sur ton téléphone.</p>
+        <div class="field"><label class="label" for="pseudo">Pseudo</label><input id="pseudo" maxlength="20" autocomplete="off" autocapitalize="off" placeholder="ex. antton" value="${esc(SOC.pseudoDraft||'')}"></div>
+        <button class="btn block" data-act="signup" ${SOC.busy?'disabled':''}>${SOC.busy?'Un instant…':'C\'est parti'}</button>
+        ${SOC.err?`<p class="err">${esc(SOC.err)}</p>`:''}
+        ${SOC.pendingCode?`<p class="muted" style="margin:0;font-size:13px">Tu as été invité. Tu seras ajouté en ami dès que ton pseudo est créé.</p>`:''}
+      </div></div>`;
+  }
+  const me=SOC.me, myS=streak();
+  const board=[{id:me.id,pseudo:me.pseudo,streak:myS,best:bestStreak(),today:dayInfo(todayKey()),me:true}]
+    .concat(SOC.friends.map(f=>({id:f.id,pseudo:f.pseudo,streak:friendStreak(f),best:(f.data&&f.data.best)||0,ft:friendToday(f)})))
+    .sort((a,b)=>b.streak-a.streak||b.best-a.best);
+  const duoList=SOC.duos.map(d=>{ const fid=d.a===me.id?d.b:d.a; return SOC.friends.find(x=>x.id===fid); }).filter(Boolean);
+  return `<div class="view">${head}
+    <div class="card code-card"><span class="label">Ton code ami</span>
+      <div class="row"><span class="code">${esc(me.friend_code)}</span><span class="spacer"></span><span class="muted">@${esc(me.pseudo)}</span></div>
+      <div class="row" style="flex-wrap:wrap"><button class="btn small" data-act="shareInvite">Inviter un pote</button><button class="btn small ghost" data-act="copyCode">Copier le code</button></div></div>
+    <div class="card"><span class="label">Ajouter un ami</span>
+      <div class="row"><input id="addCode" class="code-in" maxlength="8" autocomplete="off" autocapitalize="characters" placeholder="Son code" aria-label="Code de ton ami" value="${SOC.err?esc(SOC.codeDraft||''):''}"><button class="btn small" data-act="addFriend" ${SOC.busy?'disabled':''}>Ajouter</button></div>
+      ${SOC.err?`<p class="err">${esc(SOC.err)}</p>`:''}</div>
+    ${duoList.length?duoCardsHome():''}
+    <div class="section"><div class="section-head"><span class="label">Classement des séries</span><button class="link" data-act="refreshSocial">Actualiser</button></div>
+      ${SOC.friends.length?'':'<p class="muted" style="margin:0">Ajoute un ami avec son code pour lancer le classement.</p>'}
+      <div class="list">${board.map((p,i)=>{
+        const st = p.me ? ((p.today.full||p.today.frozen)?'Journée faite ✓':`${p.today.done}/${p.today.total} aujourd'hui`)
+                        : (p.ft.full?'Journée faite ✓':(p.ft.seen?`${p.ft.done}/${p.ft.total} aujourd'hui`:'Pas encore ouvert aujourd\'hui'));
+        return `<button class="li rank ${p.me?'me':''}" ${p.me?'data-act="tab" data-id="progres"':`data-act="friend" data-id="${p.id}"`}>
+          <span class="pos">${i+1}</span>${avatar(p.pseudo)}<span class="t">@${esc(p.pseudo)}${p.me?' <small class="muted">(toi)</small>':''}<small class="muted" style="display:block;font-weight:500">${st}</small></span>
+          <span class="duo-n">${flameSVG(p.streak>0)}${p.streak}</span></button>`; }).join('')}</div></div>
+  </div>`;
+}
+
+function friendSheetHTML(f){
+  const d=f.data, duo=duoWith(f.id), ft=friendToday(f);
+  let cal='';
+  if(d&&d.arc){
+    const a=d.arc;
+    for(let i=0;i<a.days;i++){ const kk=addDays(a.start,i), s=fState(f,kk), fut=kk>todayKey();
+      const cls= s==='f'?'full':s==='z'?'frozen':s==='p'?'part':(fut?'future':(s==='m'?'miss':''));
+      cal+=`<button class="${cls} ${kk===todayKey()?'today':''}" tabindex="-1">${s==='z'?'❄':i+1}</button>`; }
+  }
+  return `<div class="row">${avatar(f.pseudo)}<h2>@${esc(f.pseudo)}</h2><span class="spacer"></span><button class="btn small ghost" data-act="closeSheet">Fermer</button></div>
+    ${d?'':'<p class="muted" style="margin:0">Pas encore de données. Ton pote doit ouvrir l\'appli une fois.</p>'}
+    ${d?`<div class="stats">
+      <div class="stat"><span class="label">Série</span><span class="v">${friendStreak(f)}</span></div>
+      <div class="stat"><span class="label">Meilleure série</span><span class="v">${d.best||0}</span></div>
+      <div class="stat"><span class="label">Aujourd'hui</span><span class="v">${ft.seen?ft.done+'/'+ft.total:'–'}</span></div>
+      <div class="stat"><span class="label">Gels</span><span class="v">${d.gels||0}</span></div></div>`:''}
+    ${d&&d.arc?`<div class="card"><div class="row"><h3>${esc(d.arc.emoji)} ${esc(d.arc.name)}</h3><span class="spacer"></span>${d.arc.day?`<span class="pill">Jour ${d.arc.day}/${d.arc.days}</span>`:''}</div><div class="cal">${cal}</div></div>`:''}
+    ${d&&d.ch&&d.ch.length?`<div class="section"><span class="label">Défis 30 jours en cours</span><div class="chips">${d.ch.map(c=>`<span class="chip">${esc(c.icon)} ${esc(c.name)} · J${c.day}</span>`).join('')}</div></div>`:''}
+    <div class="section"><span class="label">Duo</span>
+      ${duo?`<p class="muted" style="margin:0;font-size:13.5px">Série commune : <strong>${duoStreak(f,duo.start_date)} jour(s)</strong>. Elle compte un jour seulement si vous avez tous les deux fini votre journée (ou mis un gel).</p>
+        <button class="btn ghost block" data-act="askStopDuo" data-id="${f.id}">Arrêter le duo</button><div id="duoZone"></div>`
+      :`<p class="muted" style="margin:0;font-size:13.5px">Une série commune : si l'un de vous rate sa journée, vous la perdez tous les deux.</p>
+        <button class="btn block" data-act="startDuo" data-id="${f.id}">Lancer un duo avec @${esc(f.pseudo)}</button>`}</div>
+    <button class="btn danger block" data-act="askRemoveFriend" data-id="${f.id}">Retirer des amis</button><div id="rmZone"></div>`;
+}
+
+async function socialAction(act,el){
+  const c=sbc(), id=el.dataset.id;
+  switch(act){
+    case 'signup': {
+      const p=(document.getElementById('pseudo').value||'').trim().replace(/^@/,''); SOC.pseudoDraft=p;
+      if(p.length<2){ SOC.err='Ton pseudo doit faire au moins 2 caractères.'; render(); return; }
+      if(!/^[\p{L}\p{N}_.\-]+$/u.test(p)){ SOC.err='Lettres, chiffres, point, tiret et _ seulement.'; render(); return; }
+      if(!c){ SOC.err='Connexion au serveur impossible.'; render(); return; }
+      SOC.busy=true; SOC.err=''; render();
+      try{
+        let {data:{session}}=await c.auth.getSession();
+        if(!session){ const r=await c.auth.signInAnonymously(); if(r.error) throw r.error; session=r.data.session; }
+        const {data,error}=await c.from('profiles').insert({id:session.user.id,pseudo:p}).select().single();
+        if(error) throw error;
+        SOC.me=data; await publishStats(); await socialLoad(); await usePendingCode(); toast('Bienvenue @'+p);
+      }catch(e){ SOC.err=errText(e); }
+      SOC.busy=false; render(); return; }
+    case 'copyCode':
+      try{ await navigator.clipboard.writeText(SOC.me.friend_code); toast('Code copié'); }catch(e){ toast('Ton code : '+SOC.me.friend_code); }
+      return;
+    case 'shareInvite': {
+      const url=location.origin+location.pathname+'?ami='+SOC.me.friend_code;
+      const text='Rejoins-moi sur Givre, mon code ami : '+SOC.me.friend_code;
+      try{ if(navigator.share){ await navigator.share({title:'Givre',text,url}); return; } }catch(e){ if(e&&e.name==='AbortError') return; }
+      try{ await navigator.clipboard.writeText(text+'\n'+url); toast('Lien d\'invitation copié'); }catch(e){ toast(url); }
+      return; }
+    case 'addFriend': {
+      const code=(document.getElementById('addCode').value||'').trim(); SOC.codeDraft=code;
+      if(!code) return;
+      SOC.busy=true; SOC.err=''; render();
+      try{ const {data,error}=await c.rpc('add_friend',{code}); if(error) throw error; toast('@'+data.pseudo+' ajouté'); await socialLoad(); }
+      catch(e){ SOC.err=errText(e); }
+      SOC.busy=false; render(); return; }
+    case 'refreshSocial': await publishStats(); await socialLoad(); toast('À jour'); return;
+    case 'friend': { const f=SOC.friends.find(x=>x.id===id); if(f) openSheet(friendSheetHTML(f)); return; }
+    case 'startDuo':
+      try{ const {error}=await c.rpc('start_duo',{fid:id,start_on:todayKey()}); if(error) throw error; await socialLoad(); const f=SOC.friends.find(x=>x.id===id); if(f) setSheet(friendSheetHTML(f)); toast('Duo lancé 🔥'); buzz(30); }
+      catch(e){ toast(errText(e)); }
+      return;
+    case 'askStopDuo': document.getElementById('duoZone').innerHTML=confirmBox('Arrêter le duo ? La série commune sera perdue.','doStopDuo" data-id="'+id,'Arrêter'); return;
+    case 'doStopDuo': {
+      const me=SOC.me.id;
+      try{ const {error}=await c.from('duos').delete().eq('a',me<id?me:id).eq('b',me<id?id:me); if(error) throw error; await socialLoad(); const f=SOC.friends.find(x=>x.id===id); if(f) setSheet(friendSheetHTML(f)); toast('Duo arrêté'); }
+      catch(e){ toast(errText(e)); }
+      return; }
+    case 'askRemoveFriend': document.getElementById('rmZone').innerHTML=confirmBox('Retirer cet ami ? Votre duo s\'arrête aussi.','doRemoveFriend" data-id="'+id,'Retirer'); return;
+    case 'doRemoveFriend':
+      try{ const {error}=await c.rpc('remove_friend',{fid:id}); if(error) throw error; closeSheet(true); await socialLoad(); toast('Ami retiré'); }
+      catch(e){ toast(errText(e)); }
+      return;
+  }
+}
+const SOCIAL_ACTS=['signup','copyCode','shareInvite','addFriend','refreshSocial','friend','startDuo','askStopDuo','doStopDuo','askRemoveFriend','doRemoveFriend'];
 
 /* ---------- Feuilles ---------- */
 let sheetEl=null, scrimEl=null;
@@ -867,6 +1105,7 @@ let pendingProgram=null;
 document.addEventListener('click', async (ev)=>{
   const el=ev.target.closest('[data-act]'); if(!el) return;
   const act=el.dataset.act, id=el.dataset.id;
+  if(SOCIAL_ACTS.includes(act)){ socialAction(act,el); return; }
   switch(act){
     case 'tab': tab=id; closeSheet(true); render(); window.scrollTo({top:0}); break;
     case 'defisTab': defisTab=id; render(); break;
@@ -1023,7 +1262,7 @@ document.getElementById('photoInput').addEventListener('change', async (e)=>{
   }catch(err){ toast('Impossible de lire cette photo'); }
 });
 
-document.addEventListener('visibilitychange',()=>{ if(!document.hidden && tab==='today'){ render(); } });
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; if(tab==='today') render(); if(SOC.me){ publishStats(); socialLoad(); } });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape' && sheetEl){ closeSheet(); render(); } });
 
 // Hors connexion (seulement quand l'appli est hébergée normalement)
@@ -1032,6 +1271,8 @@ if('serviceWorker' in navigator && location.protocol==='https:' && !/claude|anth
 }
 
 load(); applyTheme(); render();
+socialInit().then(()=>{ if(tab==='amis'||tab==='today') render(); });
+setInterval(()=>{ if(SOC.me && !document.hidden) socialLoad(); }, 60000);
 })();
 </script>
 
