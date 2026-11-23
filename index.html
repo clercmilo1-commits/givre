@@ -138,7 +138,7 @@ h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:-.
 .photo-thumb.taken svg{color:var(--fg)}
 
 /* Défis */
-.tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:14px;background:var(--surface);border:1px solid var(--line)}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px;border-radius:14px;background:var(--surface);border:1px solid var(--line)}
 .tabs button{min-height:40px;border-radius:10px;font-weight:600;color:var(--muted)}
 .tabs button[aria-pressed="true"]{background:var(--surface-2);color:var(--fg);box-shadow:0 1px 0 var(--line)}
 .ch{--c:#3b82f6;display:flex;gap:14px;align-items:flex-start}
@@ -147,6 +147,7 @@ h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:-.
 .ch h3{font-size:16.5px}
 .ch p{margin:0;font-size:13.5px;color:var(--muted)}
 .grid30{display:grid;grid-template-columns:repeat(15,1fr);gap:4px;margin-top:6px}
+.grid30.g7{grid-template-columns:repeat(7,1fr);max-width:320px}
 .grid30 i{aspect-ratio:1;border-radius:4px;background:var(--surface-2);border:1px solid var(--line)}
 .grid30 i.d{background:var(--c);border-color:transparent}
 .grid30 i.t{box-shadow:0 0 0 2px color-mix(in oklab,var(--c) 60%,transparent)}
@@ -204,10 +205,48 @@ h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:-.
 .rank .pos{width:22px;font-family:var(--display);font-weight:800;color:var(--muted);text-align:center;flex:none}
 .rank.me{border-color:color-mix(in oklab,var(--ice) 45%,var(--line))}
 
+/* Classement et grades */
+.tier{display:inline-flex;align-items:center;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:99px;color:#fff;white-space:nowrap;flex:none}
+.t-bronze{background:linear-gradient(135deg,#b8743a,#7a4419)}
+.t-silver{background:linear-gradient(135deg,#c9d3df,#7f8b99);color:#10161f}
+.t-gold{background:linear-gradient(135deg,#ffd84a,#d39200);color:#2a1c00}
+.t-plat{background:linear-gradient(135deg,#7ff0e0,#2a9d8f);color:#06231f}
+.t-diam{background:linear-gradient(135deg,#9ad8ff,#3b6bff)}
+.t-prism{background:linear-gradient(90deg,#ff5f6d,#ffc371,#7cffb2,#5bc0ff,#c77dff,#ff5f6d);background-size:300% 100%;animation:prism 4s linear infinite}
+@keyframes prism{to{background-position:300% 0}}
+.t-frost{background:linear-gradient(135deg,#bfe8ff,#6bb8e6);color:#08202f}
+.t-ice{background:linear-gradient(135deg,#6fd3ff,#1f8fd1)}
+.t-pack{background:linear-gradient(135deg,#e8f6ff,#8fb9d6);color:#0b2233}
+.t-glacier{background:linear-gradient(135deg,#4cc3ff,#3f51b5)}
+.t-aurora{background:linear-gradient(90deg,#34d399,#38bdf8,#a78bfa,#34d399);background-size:300% 100%;animation:prism 5s linear infinite}
+.podium{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:8px;align-items:end;margin-top:6px}
+.pod{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center;min-width:0}
+.pod .pname{font-weight:700;font-size:13.5px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pod .block{width:100%;border-radius:14px 14px 6px 6px;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:28px;color:#fff;margin-top:4px}
+.pod.p1 .block{height:110px;background:linear-gradient(180deg,#ffcf3f,#e08a00)}
+.pod.p2 .block{height:80px;background:linear-gradient(180deg,#d5dde7,#8996a6)}
+.pod.p3 .block{height:62px;background:linear-gradient(180deg,#d48a4d,#8a4d22)}
+.pod.empty-pod .block{opacity:.25}
+.pod.mine .pname{color:var(--ice)}
+.pod .crown{font-size:24px;line-height:1;animation:float 3s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-4px)}}
+.avs{display:flex;justify-content:center}
+.avs .av+.av{margin-left:-10px;box-shadow:0 0 0 2px var(--bg)}
+.pod .av{width:46px;height:46px;font-size:18px}
+.pod.p1 .av{width:56px;height:56px;font-size:22px;box-shadow:0 0 0 3px #ffcf3f}
+.avs.sm .av{width:30px;height:30px;font-size:13px}
+.me-rank{background:linear-gradient(135deg,color-mix(in oklab,var(--ice) 14%,var(--surface)),var(--surface))}
+.duo-n.big{font-size:30px}.duo-n.big svg{width:30px;height:30px}
+.rankno{font-family:var(--display);font-weight:800;font-size:30px;text-align:right;line-height:1}
+.rankno small{display:block;font-family:var(--body);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.req{border-color:color-mix(in oklab,var(--flame-b) 45%,var(--line));background:color-mix(in oklab,var(--flame-b) 10%,var(--surface))}
+.lock-card{gap:6px}
+.nav button{font-size:10.5px}
+
 /* Navigation */
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:8px max(12px,env(safe-area-inset-left,0px)) calc(8px + env(safe-area-inset-bottom,0px));
   background:color-mix(in oklab,var(--bg) 82%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--line)}
-.nav-in{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.nav-in{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
 .nav button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;border-radius:12px;font-size:11.5px;font-weight:600;color:var(--muted)}
 .nav button svg{width:23px;height:23px}
 .nav button[aria-current="page"]{color:var(--fg)}
@@ -300,6 +339,7 @@ const I = {
   home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg>',
   target:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 4v16M18 4v16M3 8v8M21 8v8M6 12h12"/></svg>',
   chart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>',
+  trophy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>',
   users:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6"/></svg>',
   cam:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v12H4z"/><circle cx="12" cy="13.5" r="3.5"/></svg>',
   lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
@@ -372,10 +412,16 @@ function freshState(){
   return {
     v:1, theme:'dark', name:'', haptics:true, sound:true,
     programs, arc:arcFromProgram(programs[0]),
-    pastArcs:[], challenges:cat, log:{}, frozen:{}
+    pastArcs:[], challenges:cat.concat(week7()), seed7:1, log:{}, frozen:{}
   };
 }
+const CATALOG7=[
+  ['Semaine sans réseaux','📵','#64748b','Aucun réseau social pendant 7 jours.'],
+  ['Réveil à 6 h 30','🌅','#d97706','Debout à 6 h 30 tous les matins de la semaine.']
+];
+const week7 = () => CATALOG7.map(([name,icon,color,desc])=>({id:uid(),days:7,name,icon,color,desc,start:null}));
 function migrate(){
+  if(!S.seed7){ S.challenges=S.challenges.concat(week7()); S.seed7=1; }
   if(!S.programs) S.programs=defaultPrograms();
   if(!S.frozen) S.frozen={};
 }
@@ -418,11 +464,12 @@ async function getPhoto(key){
 const arcEnd = a => addDays(a.start, a.days-1);
 function arcDay(k){ const a=S.arc; if(!a) return 0; return diffDays(a.start,k)+1; }
 function inArc(k){ const a=S.arc; return !!a && k>=a.start && k<=arcEnd(a); }
-function chActive(c,k){ return !!c.start && k>=c.start && diffDays(c.start,k)<30; }
+const chDays = c => c.days||30;
+function chActive(c,k){ return !!c.start && k>=c.start && diffDays(c.start,k)<chDays(c); }
 function tasksFor(k){
   const out=[];
   if(inArc(k)) S.arc.rules.forEach(r=>out.push({key:'r:'+r.id, name:r.name, icon:r.icon, color:r.color, kind:'rule'}));
-  S.challenges.forEach(c=>{ if(chActive(c,k)) out.push({key:'c:'+c.id, name:c.name, icon:c.icon, color:c.color, kind:'ch', day:diffDays(c.start,k)+1}); });
+  S.challenges.forEach(c=>{ if(chActive(c,k)) out.push({key:'c:'+c.id, name:c.name, icon:c.icon, color:c.color, kind:'ch', len:chDays(c), day:diffDays(c.start,k)+1}); });
   return out;
 }
 function dayInfo(k){
@@ -559,7 +606,7 @@ function applyTheme(){
 }
 
 function renderNav(){
-  const items=[['today','Aujourd\'hui',I.home],['defis','Défis',I.target],['progres','Progrès',I.chart],['amis','Amis',I.users]];
+  const items=[['today','Aujourd\'hui',I.home],['defis','Défis',I.target],['progres','Progrès',I.chart],['classement','Classement',I.trophy],['amis','Amis',I.users]];
   document.getElementById('nav').innerHTML = items.map(([id,l,ic])=>
     `<button data-act="tab" data-id="${id}" ${tab===id?'aria-current="page"':''}>${ic}<span>${l}</span></button>`).join('');
 }
@@ -569,6 +616,7 @@ function render(){
   else if(tab==='defis') app.innerHTML=viewDefis();
   else if(tab==='progres') { app.innerHTML=viewProgres(); fillGallery(); }
   else if(tab==='amis') app.innerHTML=viewAmis();
+  else if(tab==='classement') app.innerHTML=viewClassement();
   if(tab==='today') requestAnimationFrame(updateHero);
 }
 
@@ -589,14 +637,14 @@ function viewToday(){
   } else if(a && k>arcEnd(a)){
     hero=`<div class="card empty"><h2>${esc(a.name)} terminé 🎉</h2><p class="muted">Tes photos sont révélées dans l'onglet Progrès. Lance un nouveau défi de 90 jours quand tu veux.</p><button class="btn" data-act="tab" data-id="defis">Choisir un nouveau défi</button></div>`;
   } else {
-    hero=`<div class="card empty"><h2>Pas de grand défi en cours</h2><p class="muted">Choisis un défi de 90 jours, ou lance seulement des défis de 30 jours.</p><button class="btn" data-act="tab" data-id="defis">Voir les défis</button></div>`;
+    hero=`<div class="card empty"><h2>Pas de grand défi en cours</h2><p class="muted">Choisis un défi de 90 jours, ou lance seulement des défis de 30 jours ou d'une semaine.</p><button class="btn" data-act="tab" data-id="defis">Voir les défis</button></div>`;
   }
   const week = weekStrip(k);
   const list = tasks.length ? tasks.map(t=>taskHTML(t,k)).join('') :
     `<div class="card empty"><p class="muted">Aucune tâche aujourd'hui.</p><button class="btn small" data-act="tab" data-id="defis">Ajouter un défi</button></div>`;
   return `<div class="view">${topbar()}
     <section class="hero">${hero}
-      <div class="streak ${st?'':'off'}" id="streak">${flameSVG(st>0)}<span id="streakN">${st}</span><small>jour${st>1?'s':''} de série</small></div>
+      <div class="row" style="gap:8px;justify-content:center;flex-wrap:wrap"><div class="streak ${st?'':'off'}" id="streak">${flameSVG(st>0)}<span id="streakN">${st}</span><small>jour${st>1?'s':''} de série</small></div><span id="homeTier">${tierBadge(st,SOLO_TIERS)}</span></div>
       ${week}
     </section>
     ${duoCardsHome()}
@@ -621,7 +669,7 @@ function weekStrip(k){
 }
 function taskHTML(t,k){
   const done=isDone(k,t.key);
-  const sub = t.kind==='ch' ? `Défi 30 jours · jour ${t.day}/30` : esc(S.arc.name);
+  const sub = t.kind==='ch' ? `Défi ${t.len||30} jours · jour ${t.day}/${t.len||30}` : esc(S.arc.name);
   return `<button class="task ${done?'done':''}" style="--c:${t.color}" data-act="toggle" data-key="${t.key}" aria-pressed="${done}">
     <span class="fill"></span><span class="ico">${icon(t.icon)}</span>
     <span class="txt"><span class="name">${esc(t.name)}</span><span class="sub">${sub}</span></span>
@@ -646,6 +694,7 @@ function updateHero(){
   if(ring && S.arc){ const p=Math.min(1,arcDay(k)/S.arc.days); ring.style.strokeDashoffset = 552.9*(1-p); }
   const st=streak(), se=document.getElementById('streak');
   if(se){ se.className='streak '+(st?'':'off'); se.innerHTML=`${flameSVG(st>0)}<span id="streakN">${st}</span><small>jour${st>1?'s':''} de série</small>`; }
+  const ht=document.getElementById('homeTier'); if(ht) ht.innerHTML=tierBadge(st,SOLO_TIERS);
   const wk=document.querySelector('.week'); if(wk) wk.outerHTML=weekStrip(k);
 }
 
@@ -669,16 +718,18 @@ function viewDefis(){
         <button class="more" data-act="progMenu" data-id="${p.id}" aria-label="Options de ${esc(p.name)}">⋯</button></div>`).join('')}
       <button class="btn ghost block" data-act="customArc">+ Créer mon propre programme</button></div>`;
   } else {
-    const act=S.challenges.filter(c=>chActive(c,k)), rest=S.challenges.filter(c=>!chActive(c,k));
+    const L=+defisTab, mine=S.challenges.filter(c=>chDays(c)===L);
+    const act=mine.filter(c=>chActive(c,k)), rest=mine.filter(c=>!chActive(c,k));
     body = `${act.length?`<div class="section"><div class="section-head"><span class="label">En cours · ${act.length}</span></div>${act.map(c=>chCard(c,true)).join('')}</div>`:''}
       <div class="section"><div class="section-head"><span class="label">Tous les défis</span><span class="muted" style="font-size:12.5px">Plusieurs à la fois, sans limite</span></div>
       ${rest.map(c=>chCard(c,false)).join('')}
-      <button class="btn ghost block" data-act="newCh">+ Ajouter un défi de 30 jours</button></div>`;
+      <button class="btn ghost block" data-act="newCh">+ Ajouter un défi ${L===7?'d\'une semaine':'de 30 jours'}</button></div>`;
   }
   return `<div class="view">${topbar('Défis')}
     <div class="tabs" role="group" aria-label="Type de défi">
-      <button data-act="defisTab" data-id="90" aria-pressed="${defisTab==='90'}">Gros défis · 90 j</button>
-      <button data-act="defisTab" data-id="30" aria-pressed="${defisTab==='30'}">Défis · 30 j</button></div>
+      <button data-act="defisTab" data-id="90" aria-pressed="${defisTab==='90'}">Gros · 90 j</button>
+      <button data-act="defisTab" data-id="30" aria-pressed="${defisTab==='30'}">30 jours</button>
+      <button data-act="defisTab" data-id="7" aria-pressed="${defisTab==='7'}">1 semaine</button></div>
     ${body}</div>`;
 }
 function chCard(c,active){
@@ -687,10 +738,11 @@ function chCard(c,active){
   if(active){
     const day=diffDays(c.start,k)+1;
     let cells='', got=0;
-    for(let i=0;i<30;i++){ const kk=addDays(c.start,i); const d=isDone(kk,'c:'+c.id); if(d) got++; cells+=`<i class="${d?'d':''} ${kk===k?'t':''}"></i>`; }
+    const N=chDays(c);
+    for(let i=0;i<N;i++){ const kk=addDays(c.start,i); const d=isDone(kk,'c:'+c.id); if(d) got++; cells+=`<i class="${d?'d':''} ${kk===k?'t':''}"></i>`; }
     return `<div class="card prog-card" style="--c:${c.color}">
-      <div class="ch" style="--c:${c.color}"><div class="ico">${icon(c.icon)}</div><div class="body"><div class="row"><h3>${esc(c.name)}</h3><span class="spacer"></span><span class="pill">Jour ${day}/30</span></div><p>${esc(c.desc)}</p></div>${more}</div>
-      <div class="grid30">${cells}</div>
+      <div class="ch" style="--c:${c.color}"><div class="ico">${icon(c.icon)}</div><div class="body"><div class="row"><h3>${esc(c.name)}</h3><span class="spacer"></span><span class="pill">Jour ${day}/${N}</span></div><p>${esc(c.desc)}</p></div>${more}</div>
+      <div class="grid30 ${N===7?'g7':''}">${cells}</div>
       <div class="row"><span class="muted" style="font-size:13px">${got} jour${got>1?'s':''} tenu${got>1?'s':''}</span><span class="spacer"></span>
       <button class="btn small ghost" data-act="askStopCh" data-id="${c.id}">Arrêter</button></div>
       <div id="stopCh-${c.id}"></div></div>`;
@@ -727,7 +779,7 @@ function viewProgres(){
       <div class="stat"><span class="label">Série actuelle</span><span class="v">${streak()}</span></div>
       <div class="stat"><span class="label">Meilleure série</span><span class="v">${bestStreak()}</span></div>
     </div>
-    ${actCh.length?`<div class="section"><span class="label">Défis 30 jours en cours</span>${actCh.map(c=>chCard(c,true)).join('')}</div>`:''}
+    ${actCh.length?`<div class="section"><span class="label">Défis en cours</span>${actCh.map(c=>chCard(c,true)).join('')}</div>`:''}
     <div class="section"><div class="section-head"><span class="label">Photos du jour</span><span class="muted" style="font-size:12.5px">${ended?'Révélées':'Révélées au jour '+a.days}</span></div>
       <div class="gallery" id="gallery"></div></div>
   </div>`;
@@ -743,7 +795,7 @@ async function fillGallery(){
 /* ---------- Amis (Supabase) ---------- */
 const SUPA_URL='https://cnoaizuvnfaavjgnxubi.supabase.co';
 const SUPA_KEY='sb_publishable_CHGHNNkyziFdBv_6GqS-cQ_0zR7dnx3';
-const SOC={sb:null, me:null, ready:false, busy:false, err:'', friends:[], duos:[], loaded:false, pendingCode:null};
+const SOC={viewers:[],sb:null, me:null, ready:false, busy:false, err:'', friends:[], duos:[], loaded:false, pendingCode:null};
 try{ const q=new URLSearchParams(location.search).get('ami'); if(q) SOC.pendingCode=q.toUpperCase().slice(0,12); }catch(e){}
 function sbc(){
   if(SOC.sb) return SOC.sb;
@@ -756,6 +808,8 @@ function errText(e){
   if(/code_inconnu/.test(m)) return 'Aucun ami avec ce code. Vérifie les lettres.';
   if(/ton_code/.test(m)) return 'C\'est ton propre code.';
   if(/pas_ami/.test(m)) return 'Ajoute-le d\'abord en ami.';
+  if(/pas_de_demande/.test(m)) return 'Cette demande n\'existe plus.';
+  if(/stats_detail|viewers|visibility|accept_duo|board_solo|board_groups/.test(m)) return 'Il manque la mise à jour Supabase (script v2).';
   if(/anonymous/i.test(m)&&/disabled/i.test(m)) return 'Active « Allow anonymous sign-ins » dans Supabase (Authentication).';
   if(/profiles_pseudo_lower|duplicate key/.test(m)) return 'Ce pseudo est déjà pris. Choisis-en un autre.';
   if(/relation .* does not exist|schema cache/i.test(m)) return 'Le script SQL n\'a pas encore été lancé dans Supabase.';
@@ -789,17 +843,19 @@ async function socialLoad(){
   try{
     const {data:fr,error:e1}=await c.from('friends').select('friend_id').eq('user_id',me.id); if(e1) throw e1;
     const ids=(fr||[]).map(x=>x.friend_id);
-    let profs=[], st=[];
+    let profs=[], st=[], det=[];
     if(ids.length){
-      const [p,s]=await Promise.all([c.from('profiles').select('id,pseudo').in('id',ids), c.from('stats').select('user_id,data,updated_at').in('user_id',ids)]);
-      profs=p.data||[]; st=s.data||[];
+      const [p,s,dt]=await Promise.all([c.from('profiles').select('id,pseudo').in('id',ids), c.from('stats').select('user_id,data,updated_at').in('user_id',ids), c.from('stats_detail').select('user_id,data').in('user_id',ids)]);
+      profs=p.data||[]; st=s.data||[]; SOC.v2 = !dt.error; det=dt.data||[];
     }
-    SOC.friends=ids.map(id=>({id, pseudo:(profs.find(p=>p.id===id)||{}).pseudo||'?', data:(st.find(s=>s.user_id===id)||{}).data||null}));
+    SOC.friends=ids.map(id=>({id, pseudo:(profs.find(p=>p.id===id)||{}).pseudo||'?', data:(st.find(s=>s.user_id===id)||{}).data||null, detail:(det.find(s=>s.user_id===id)||{}).data||null}));
     const {data:d}=await c.from('duos').select('*'); SOC.duos=d||[];
+    const {data:mp}=await c.from('profiles').select('*').eq('id',me.id).maybeSingle(); if(mp) SOC.me=mp;
+    const vw=await c.from('viewers').select('viewer').eq('owner',me.id); SOC.viewers=(vw.data||[]).map(x=>x.viewer);
     SOC.loaded=true; SOC.err='';
   }catch(e){ SOC.err=errText(e); }
   const ae=document.activeElement;
-  if((tab==='amis'||tab==='today') && !(ae && /INPUT|TEXTAREA/.test(ae.tagName))) render();
+  if((tab==='amis'||tab==='today'||tab==='classement') && !(ae && /INPUT|TEXTAREA/.test(ae.tagName))) render();
 }
 function histMap(n){
   const out={}, first=firstKey(); let k=todayKey();
@@ -807,19 +863,28 @@ function histMap(n){
   return out;
 }
 function myStats(){
-  const k=todayKey(), di=dayInfo(k), a=S.arc;
-  return {v:1, at:Date.now(), day:k,
-    arc:a?{name:a.name,emoji:a.emoji,days:a.days,start:a.start,day:inArc(k)?arcDay(k):null}:null,
+  const k=todayKey(), di=dayInfo(k);
+  const duos=activeDuos().map(d=>{ const fid=partnerOf(d), f=SOC.friends.find(x=>x.id===fid); if(!f) return null;
+    return {with:fid, streak:duoStreak(f,d.start_date), day:k, both:okDay(k)&&fOk(f,k)}; }).filter(Boolean);
+  return {v:2, at:Date.now(), day:k,
     streak:streak(), best:bestStreak(), gels:gelsLeft(),
     today:{done:di.done,total:di.total,full:di.full||di.frozen},
-    hist:histMap(150),
-    ch:S.challenges.filter(c=>chActive(c,k)).map(c=>({name:c.name,icon:isImg(c.icon)?'💪':c.icon,day:diffDays(c.start,k)+1}))};
+    hist:histMap(150), duos};
 }
+function myDetail(){
+  const k=todayKey(), a=S.arc;
+  return {arc:a?{name:a.name,emoji:a.emoji,days:a.days,start:a.start,day:inArc(k)?arcDay(k):null}:null,
+    ch:S.challenges.filter(c=>chActive(c,k)).map(c=>({name:c.name,icon:isImg(c.icon)?'💪':c.icon,day:diffDays(c.start,k)+1,len:chDays(c)}))};
+}
+const activeDuos = () => SOC.duos.filter(d=>(d.status||'active')==='active');
+const partnerOf = d => d.a===SOC.me.id ? d.b : d.a;
 let pubT=null;
 function schedulePublish(){ if(!SOC.me) return; clearTimeout(pubT); pubT=setTimeout(publishStats,1500); }
 async function publishStats(){
   if(!SOC.me||!SOC.sb) return;
-  try{ await SOC.sb.from('stats').upsert({user_id:SOC.me.id,data:myStats(),updated_at:new Date().toISOString()}); }catch(e){}
+  const now=new Date().toISOString();
+  try{ await SOC.sb.from('stats').upsert({user_id:SOC.me.id,data:myStats(),updated_at:now}); }catch(e){}
+  try{ await SOC.sb.from('stats_detail').upsert({user_id:SOC.me.id,data:myDetail(),updated_at:now}); }catch(e){}
 }
 const fState = (f,k) => (f.data&&f.data.hist&&f.data.hist[k])||'';
 const fOk = (f,k) => { const s=fState(f,k); return s==='f'||s==='z'; };
@@ -844,10 +909,20 @@ function duoStreak(f,start){
 function avatar(p){ const ch=(p||'?').trim().charAt(0).toUpperCase(); let h=0; for(const c of p||'') h=(h*31+c.charCodeAt(0))%360;
   return `<span class="av" style="background:hsl(${h} 55% 45%)">${esc(ch)}</span>`; }
 
+function duoRequestsHome(){
+  if(!SOC.me) return '';
+  const inc=SOC.duos.filter(d=>d.status==='pending' && d.requested_by && d.requested_by!==SOC.me.id);
+  return inc.map(d=>{ const fid=partnerOf(d), f=SOC.friends.find(x=>x.id===fid); const ps=f?f.pseudo:'Un ami';
+    return `<div class="card req"><div class="row">${avatar(ps)}<div style="flex:1;min-width:0"><strong>@${esc(ps)} te propose un duo</strong>
+      <span class="muted" style="display:block;font-size:13px">Une série commune : si l'un de vous rate sa journée, vous la perdez tous les deux.</span></div></div>
+      <div class="row"><button class="btn small" data-act="acceptDuo" data-id="${fid}">Accepter</button><button class="btn small ghost" data-act="declineDuo" data-id="${fid}">Refuser</button></div></div>`; }).join('');
+}
 function duoCardsHome(){
-  if(!SOC.me||!SOC.duos.length) return '';
-  const rows=SOC.duos.map(d=>{
-    const fid=d.a===SOC.me.id?d.b:d.a, f=SOC.friends.find(x=>x.id===fid); if(!f) return '';
+  if(!SOC.me) return '';
+  const req=duoRequestsHome();
+  if(!activeDuos().length) return req;
+  const rows=activeDuos().map(d=>{
+    const fid=partnerOf(d), f=SOC.friends.find(x=>x.id===fid); if(!f) return '';
     const n=duoStreak(f,d.start_date), ft=friendToday(f), mine=dayInfo(todayKey());
     const fs = ft.full?'<b class="ok">a fini sa journée ✓</b>':(ft.seen?`en est à ${ft.done}/${ft.total}`:'n\'a pas encore ouvert l\'appli aujourd\'hui');
     const nudge = ft.full && !(mine.full||mine.frozen) ? '<p class="nudge">Ton pote a tout fait. Ne lui fais pas perdre la série.</p>' : '';
@@ -855,7 +930,7 @@ function duoCardsHome(){
       <div class="row">${avatar(f.pseudo)}<div style="flex:1;min-width:0;text-align:left"><strong>Duo avec @${esc(f.pseudo)}</strong><span class="muted" style="display:block;font-size:13px">@${esc(f.pseudo)} ${fs}</span></div>
       <span class="duo-n">${flameSVG(n>0)}${n}</span></div>${nudge}</button>`;
   }).join('');
-  return `<section class="section"><span class="label">Tes duos</span>${rows}</section>`;
+  return req+`<section class="section"><span class="label">Tes duos</span>${rows}</section>`;
 }
 
 function viewAmis(){
@@ -875,7 +950,7 @@ function viewAmis(){
   const board=[{id:me.id,pseudo:me.pseudo,streak:myS,best:bestStreak(),today:dayInfo(todayKey()),me:true}]
     .concat(SOC.friends.map(f=>({id:f.id,pseudo:f.pseudo,streak:friendStreak(f),best:(f.data&&f.data.best)||0,ft:friendToday(f)})))
     .sort((a,b)=>b.streak-a.streak||b.best-a.best);
-  const duoList=SOC.duos.map(d=>{ const fid=d.a===me.id?d.b:d.a; return SOC.friends.find(x=>x.id===fid); }).filter(Boolean);
+  const duoList=SOC.duos.map(d=>SOC.friends.find(x=>x.id===partnerOf(d))).filter(Boolean);
   return `<div class="view">${head}
     <div class="card code-card"><span class="label">Ton code ami</span>
       <div class="row"><span class="code">${esc(me.friend_code)}</span><span class="spacer"></span><span class="muted">@${esc(me.pseudo)}</span></div>
@@ -897,9 +972,10 @@ function viewAmis(){
 
 function friendSheetHTML(f){
   const d=f.data, duo=duoWith(f.id), ft=friendToday(f);
+  const det = f.detail || (d&&d.v===1 ? d : null);
   let cal='';
-  if(d&&d.arc){
-    const a=d.arc;
+  if(det&&det.arc){
+    const a=det.arc;
     for(let i=0;i<a.days;i++){ const kk=addDays(a.start,i), s=fState(f,kk), fut=kk>todayKey();
       const cls= s==='f'?'full':s==='z'?'frozen':s==='p'?'part':(fut?'future':(s==='m'?'miss':''));
       cal+=`<button class="${cls} ${kk===todayKey()?'today':''}" tabindex="-1">${s==='z'?'❄':i+1}</button>`; }
@@ -911,19 +987,120 @@ function friendSheetHTML(f){
       <div class="stat"><span class="label">Meilleure série</span><span class="v">${d.best||0}</span></div>
       <div class="stat"><span class="label">Aujourd'hui</span><span class="v">${ft.seen?ft.done+'/'+ft.total:'–'}</span></div>
       <div class="stat"><span class="label">Gels</span><span class="v">${d.gels||0}</span></div></div>`:''}
-    ${d&&d.arc?`<div class="card"><div class="row"><h3>${esc(d.arc.emoji)} ${esc(d.arc.name)}</h3><span class="spacer"></span>${d.arc.day?`<span class="pill">Jour ${d.arc.day}/${d.arc.days}</span>`:''}</div><div class="cal">${cal}</div></div>`:''}
-    ${d&&d.ch&&d.ch.length?`<div class="section"><span class="label">Défis 30 jours en cours</span><div class="chips">${d.ch.map(c=>`<span class="chip">${esc(c.icon)} ${esc(c.name)} · J${c.day}</span>`).join('')}</div></div>`:''}
+    ${d&&!det?`<div class="card lock-card"><strong>🔒 Profil privé</strong><p class="muted" style="margin:0;font-size:13.5px">@${esc(f.pseudo)} montre seulement sa série, sa meilleure série et sa journée.</p></div>`:''}
+    ${det&&det.arc?`<div class="card"><div class="row"><h3>${esc(det.arc.emoji)} ${esc(det.arc.name)}</h3><span class="spacer"></span>${det.arc.day?`<span class="pill">Jour ${det.arc.day}/${det.arc.days}</span>`:''}</div><div class="cal">${cal}</div></div>`:''}
+    ${det&&det.ch&&det.ch.length?`<div class="section"><span class="label">Défis en cours</span><div class="chips">${det.ch.map(c=>`<span class="chip">${esc(c.icon)} ${esc(c.name)} · J${c.day}/${c.len||30}</span>`).join('')}</div></div>`:''}
     <div class="section"><span class="label">Duo</span>
-      ${duo?`<p class="muted" style="margin:0;font-size:13.5px">Série commune : <strong>${duoStreak(f,duo.start_date)} jour(s)</strong>. Elle compte un jour seulement si vous avez tous les deux fini votre journée (ou mis un gel).</p>
+      ${duo&&duo.status==='pending'?(duo.requested_by===SOC.me.id
+        ?`<p class="muted" style="margin:0;font-size:13.5px">Demande envoyée. @${esc(f.pseudo)} doit l'accepter depuis son appli.</p><button class="btn ghost block" data-act="declineDuo" data-id="${f.id}">Annuler la demande</button>`
+        :`<p class="muted" style="margin:0;font-size:13.5px">@${esc(f.pseudo)} te propose un duo.</p><div class="row"><button class="btn small" data-act="acceptDuo" data-id="${f.id}">Accepter</button><button class="btn small ghost" data-act="declineDuo" data-id="${f.id}">Refuser</button></div>`)
+      :duo?`<p class="muted" style="margin:0;font-size:13.5px">Série commune : <strong>${duoStreak(f,duo.start_date)} jour(s)</strong>. Elle compte un jour seulement si vous avez tous les deux fini votre journée (ou mis un gel).</p>
         <button class="btn ghost block" data-act="askStopDuo" data-id="${f.id}">Arrêter le duo</button><div id="duoZone"></div>`
       :`<p class="muted" style="margin:0;font-size:13.5px">Une série commune : si l'un de vous rate sa journée, vous la perdez tous les deux.</p>
-        <button class="btn block" data-act="startDuo" data-id="${f.id}">Lancer un duo avec @${esc(f.pseudo)}</button>`}</div>
+        <button class="btn block" data-act="startDuo" data-id="${f.id}">Proposer un duo à @${esc(f.pseudo)}</button>`}</div>
     <button class="btn danger block" data-act="askRemoveFriend" data-id="${f.id}">Retirer des amis</button><div id="rmZone"></div>`;
+}
+
+/* ---------- Classement ---------- */
+const SOLO_TIERS=[[90,'Prismatique','prism'],[60,'Diamant','diam'],[45,'Platine','plat'],[30,'Or','gold'],[20,'Argent','silver'],[10,'Bronze','bronze']];
+const GROUP_TIERS=[[90,'Aurore','aurora'],[60,'Glacier','glacier'],[30,'Banquise','pack'],[14,'Glace','ice'],[7,'Givre','frost']];
+function tierOf(n,list){ for(const t of list) if(n>=t[0]) return t; return null; }
+function nextTier(n,list){ let nx=null; for(const t of list) if(n<t[0]) nx=t; return nx; }
+function tierBadge(n,list){ const t=tierOf(n,list); return t?`<span class="tier t-${t[2]}">${t[1]}</span>`:''; }
+let boardTab='solo';
+const BOARD={solo:[],groups:[],at:0,err:'',loading:false};
+// Une série publiée hier reste valable seulement si la journée d'hier était finie
+function effStreak(n,day,done){ const t=todayKey(); if(day===t) return n||0; if(day===addDays(t,-1)) return done?(n||0):0; return 0; }
+async function loadBoard(force){
+  if(!SOC.me||!SOC.sb||BOARD.loading) return;
+  if(!force && Date.now()-BOARD.at<60000) return;
+  BOARD.loading=true;
+  try{
+    const [a,b]=await Promise.all([SOC.sb.rpc('board_solo'),SOC.sb.rpc('board_groups')]);
+    if(a.error) throw a.error; if(b.error) throw b.error;
+    BOARD.solo=(a.data||[]).map(r=>({id:r.id,pseudo:r.pseudo,streak:r.id===SOC.me.id?streak():effStreak(r.streak,r.day,r.done)}));
+    if(!BOARD.solo.some(r=>r.id===SOC.me.id)) BOARD.solo.push({id:SOC.me.id,pseudo:SOC.me.pseudo,streak:streak()});
+    BOARD.groups=(b.data||[]).map(r=>{
+      const es=[r.ea,r.eb].filter(Boolean).sort((x,y)=>(y.day||'').localeCompare(x.day||''));
+      const e=es[0]; const n=e?effStreak(e.streak,e.day,e.both):0;
+      return {id:r.a+r.b, members:[r.pseudo_a,r.pseudo_b], mine:r.a===SOC.me.id||r.b===SOC.me.id, streak:n};
+    });
+    BOARD.solo.sort((x,y)=>y.streak-x.streak||x.pseudo.localeCompare(y.pseudo));
+    BOARD.groups.sort((x,y)=>y.streak-x.streak);
+    BOARD.at=Date.now(); BOARD.err='';
+  }catch(e){ BOARD.err=errText(e); }
+  BOARD.loading=false;
+  if(tab==='classement') render();
+}
+function viewClassement(){
+  const head=topbar('Classement');
+  if(!SOC.ready) return `<div class="view">${head}<div class="card empty"><p class="muted">Connexion…</p></div></div>`;
+  if(!SOC.me) return `<div class="view">${head}<div class="card empty"><h2 style="font-size:20px">Crée ton pseudo d'abord</h2><p class="muted">Le classement se débloque dès que tu as un pseudo.</p><button class="btn" data-act="tab" data-id="amis">Choisir mon pseudo</button></div></div>`;
+  if(!BOARD.at && !BOARD.err){ loadBoard(); }
+  const solo=boardTab==='solo';
+  const rows = solo
+    ? BOARD.solo.map(r=>({key:r.id,name:'@'+r.pseudo,avs:[r.pseudo],streak:r.streak,mine:r.id===SOC.me.id}))
+    : BOARD.groups.map(g=>({key:g.id,name:g.members.map(m=>'@'+m).join(' & '),avs:g.members,streak:g.streak,mine:g.mine}));
+  const TL = solo?SOLO_TIERS:GROUP_TIERS;
+  const myRow = rows.find(r=>r.mine), myRank = myRow ? rows.indexOf(myRow)+1 : 0;
+  const top=rows.slice(0,3), rest=rows.slice(3);
+  const pod = i => { const r=top[i]; if(!r) return `<div class="pod p${i+1} empty-pod"><div class="block">${i+1}</div></div>`;
+    return `<div class="pod p${i+1} ${r.mine?'mine':''}">
+      ${i===0?'<span class="crown" aria-hidden="true">👑</span>':''}
+      <div class="avs">${r.avs.map(a=>avatar(a)).join('')}</div>
+      <span class="pname">${esc(r.name)}</span>
+      <span class="duo-n">${flameSVG(r.streak>0)}${r.streak}</span>${tierBadge(r.streak,TL)}
+      <div class="block">${i+1}</div></div>`; };
+  const myN = solo ? streak() : (myRow?myRow.streak:0);
+  const nx = nextTier(myN,TL), cur=tierOf(myN,TL);
+  return `<div class="view">${head}
+    <div class="seg" role="group" aria-label="Type de classement">
+      <button data-act="boardTab" data-v="solo" aria-pressed="${solo}">Flammes solo</button>
+      <button data-act="boardTab" data-v="groupes" aria-pressed="${!solo}">Flammes de groupe</button></div>
+    <div class="card me-rank"><div class="row"><div style="flex:1;min-width:0">
+      <span class="label">${solo?'Ta série solo':'Ta meilleure série de groupe'}</span>
+      <div class="row" style="gap:8px;margin-top:4px"><span class="duo-n big">${flameSVG(myN>0)}${myN}</span>${cur?`<span class="tier t-${cur[2]}">${cur[1]}</span>`:'<span class="muted" style="font-size:13px">Pas encore de grade</span>'}</div>
+      ${nx?`<p class="muted" style="margin:6px 0 0;font-size:13px">${nx[1]} dans ${nx[0]-myN} jour${nx[0]-myN>1?'s':''}</p>`:'<p class="muted" style="margin:6px 0 0;font-size:13px">Grade maximum atteint</p>'}
+      </div>${myRank?`<div class="rankno"><small>Place</small>#${myRank}</div>`:''}</div></div>
+    ${BOARD.err?`<p class="err">${esc(BOARD.err)}</p>`:''}
+    ${!BOARD.at&&!BOARD.err?'<p class="muted">Chargement du classement…</p>':''}
+    ${BOARD.at&&!rows.length?`<div class="card empty"><p class="muted">${solo?'Personne dans le classement pour l\'instant.':'Aucun duo actif. Propose un duo à un ami depuis l\'onglet Amis.'}</p></div>`:''}
+    ${rows.length?`<div class="podium">${pod(1)}${pod(0)}${pod(2)}</div>`:''}
+    ${rest.length?`<div class="list">${rest.map((r,i)=>`<div class="li rank ${r.mine?'me':''}"><span class="pos">${i+4}</span><div class="avs sm">${r.avs.map(a=>avatar(a)).join('')}</div>
+      <span class="t">${esc(r.name)}${r.mine?' <small class="muted">(toi)</small>':''}</span>${tierBadge(r.streak,TL)}<span class="duo-n">${flameSVG(r.streak>0)}${r.streak}</span></div>`).join('')}</div>`:''}
+    <div class="section"><div class="section-head"><span class="label">Les grades</span><button class="link" data-act="refreshBoard">Actualiser</button></div>
+      <div class="chips">${TL.slice().reverse().map(t=>`<span class="tier t-${t[2]}">${t[1]} · ${t[0]} j</span>`).join('')}</div>
+      <p class="muted" style="margin:0;font-size:12.5px">${solo?'Ta série solo compte tes journées complètes d\'affilée, gels compris. Elle ne dépend que de toi.':'Une série de groupe avance seulement quand tout le groupe a fini sa journée.'}</p></div>
+  </div>`;
 }
 
 async function socialAction(act,el){
   const c=sbc(), id=el.dataset.id;
   switch(act){
+    case 'acceptDuo':
+      try{ const {error}=await c.rpc('accept_duo',{fid:id,start_on:todayKey()}); if(error) throw error; await socialLoad(); publishStats(); toast('Duo accepté 🔥'); buzz([20,40,20]); if(sheetEl){ const f=SOC.friends.find(x=>x.id===id); if(f) setSheet(friendSheetHTML(f)); } }
+      catch(e){ toast(errText(e)); }
+      return;
+    case 'declineDuo': {
+      const me=SOC.me.id;
+      try{ const {error}=await c.from('duos').delete().eq('a',me<id?me:id).eq('b',me<id?id:me); if(error) throw error; await socialLoad(); toast('Demande retirée'); if(sheetEl){ const f=SOC.friends.find(x=>x.id===id); if(f) setSheet(friendSheetHTML(f)); } }
+      catch(e){ toast(errText(e)); }
+      return; }
+    case 'setVis': {
+      const v=el.dataset.v;
+      try{ const {error}=await c.from('profiles').update({visibility:v}).eq('id',SOC.me.id); if(error) throw error; SOC.me.visibility=v; setSheet(settingsHTML()); toast(v==='public'?'Profil visible par tes amis':v==='private'?'Profil privé':'Choisis qui peut voir ton profil'); }
+      catch(e){ toast(errText(e)); }
+      return; }
+    case 'tglViewer': {
+      const on=SOC.viewers.includes(id);
+      try{
+        const r = on ? await c.from('viewers').delete().eq('owner',SOC.me.id).eq('viewer',id) : await c.from('viewers').insert({owner:SOC.me.id,viewer:id});
+        if(r.error) throw r.error;
+        SOC.viewers = on ? SOC.viewers.filter(x=>x!==id) : SOC.viewers.concat(id); setSheet(settingsHTML());
+      }catch(e){ toast(errText(e)); }
+      return; }
+    case 'boardTab': boardTab=el.dataset.v; render(); return;
+    case 'refreshBoard': await publishStats(); await loadBoard(true); return;
     case 'signup': {
       const p=(document.getElementById('pseudo').value||'').trim().replace(/^@/,''); SOC.pseudoDraft=p;
       if(p.length<2){ SOC.err='Ton pseudo doit faire au moins 2 caractères.'; render(); return; }
@@ -957,7 +1134,7 @@ async function socialAction(act,el){
     case 'refreshSocial': await publishStats(); await socialLoad(); toast('À jour'); return;
     case 'friend': { const f=SOC.friends.find(x=>x.id===id); if(f) openSheet(friendSheetHTML(f)); return; }
     case 'startDuo':
-      try{ const {error}=await c.rpc('start_duo',{fid:id,start_on:todayKey()}); if(error) throw error; await socialLoad(); const f=SOC.friends.find(x=>x.id===id); if(f) setSheet(friendSheetHTML(f)); toast('Duo lancé 🔥'); buzz(30); }
+      try{ const {error}=await c.rpc('start_duo',{fid:id,start_on:todayKey()}); if(error) throw error; await socialLoad(); const f=SOC.friends.find(x=>x.id===id); if(f) setSheet(friendSheetHTML(f)); toast(duoWith(id)&&duoWith(id).status==='active'?'Duo lancé 🔥':'Demande de duo envoyée'); buzz(30); }
       catch(e){ toast(errText(e)); }
       return;
     case 'askStopDuo': document.getElementById('duoZone').innerHTML=confirmBox('Arrêter le duo ? La série commune sera perdue.','doStopDuo" data-id="'+id,'Arrêter'); return;
@@ -973,7 +1150,7 @@ async function socialAction(act,el){
       return;
   }
 }
-const SOCIAL_ACTS=['signup','copyCode','shareInvite','addFriend','refreshSocial','friend','startDuo','askStopDuo','doStopDuo','askRemoveFriend','doRemoveFriend'];
+const SOCIAL_ACTS=['acceptDuo','declineDuo','setVis','tglViewer','boardTab','refreshBoard','signup','copyCode','shareInvite','addFriend','refreshSocial','friend','startDuo','askStopDuo','doStopDuo','askRemoveFriend','doRemoveFriend'];
 
 /* ---------- Feuilles ---------- */
 let sheetEl=null, scrimEl=null;
@@ -1052,6 +1229,21 @@ function arcEditorHTML(){
     :`<button class="btn block" data-act="startProgram" data-id="${a.id}">Lancer ce programme aujourd'hui</button>`}`;
 }
 
+function privacyHTML(){
+  if(typeof SOC==='undefined'||!SOC.me) return '';
+  const v=SOC.me.visibility||'public';
+  const desc = v==='public'?'Tous tes amis voient ton défi en cours, tes petits défis et ton calendrier.'
+    : v==='private'?'Tes amis voient seulement ta série, ta meilleure série et ta journée. Rien sur tes défis.'
+    : 'Seuls les amis cochés voient tes défis et ton calendrier. Les autres voient seulement ta série.';
+  return `<div class="field"><span class="label">Qui voit mon profil</span>
+    <div class="seg" role="group" aria-label="Confidentialité">
+      <button data-act="setVis" data-v="public" aria-pressed="${v==='public'}">Public</button>
+      <button data-act="setVis" data-v="private" aria-pressed="${v==='private'}">Privé</button>
+      <button data-act="setVis" data-v="custom" aria-pressed="${v==='custom'}">Perso</button></div>
+    <p class="muted" style="margin:0;font-size:13px">${desc}</p>
+    ${v==='custom'?(SOC.friends.length?`<div class="list">${SOC.friends.map(f=>`<div class="li">${avatar(f.pseudo)}<span class="t">@${esc(f.pseudo)}</span><button class="switch" role="switch" aria-checked="${SOC.viewers.includes(f.id)}" data-act="tglViewer" data-id="${f.id}" aria-label="@${esc(f.pseudo)} peut voir"></button></div>`).join('')}</div>`:'<p class="muted" style="margin:0;font-size:13px">Ajoute des amis pour les choisir ici.</p>'):''}
+  </div>`;
+}
 function settingsHTML(){
   return `<div class="row"><h2>Réglages</h2><span class="spacer"></span><button class="btn small ghost" data-act="closeSheet">Fermer</button></div>
     <div class="li"><span class="e" style="background:color-mix(in oklab,var(--ice) 20%,transparent)">❄️</span><span class="t">Gels de série : ${gelsLeft()}</span><span class="muted" style="font-size:12.5px">prochain dans ${toNextGel()} j</span></div>
@@ -1060,6 +1252,7 @@ function settingsHTML(){
         <button data-act="theme" data-v="dark" aria-pressed="${S.theme==='dark'}">Sombre</button>
         <button data-act="theme" data-v="light" aria-pressed="${S.theme==='light'}">Clair</button>
         <button data-act="theme" data-v="auto" aria-pressed="${S.theme==='auto'}">Auto</button></div></div>
+    ${privacyHTML()}
     <div class="li"><span class="t">Vibrations</span><button class="switch" role="switch" aria-checked="${S.haptics}" data-act="tgl" data-v="haptics" aria-label="Vibrations"></button></div>
     <div class="li"><span class="t">Sons</span><button class="switch" role="switch" aria-checked="${S.sound}" data-act="tgl" data-v="sound" aria-label="Sons"></button></div>
     <div class="section"><span class="label">Sauvegarde</span>
@@ -1107,7 +1300,7 @@ document.addEventListener('click', async (ev)=>{
   const act=el.dataset.act, id=el.dataset.id;
   if(SOCIAL_ACTS.includes(act)){ socialAction(act,el); return; }
   switch(act){
-    case 'tab': tab=id; closeSheet(true); render(); window.scrollTo({top:0}); break;
+    case 'tab': tab=id; closeSheet(true); render(); window.scrollTo({top:0}); if(id==='classement') loadBoard(); break;
     case 'defisTab': defisTab=id; render(); break;
     case 'settings': openSheet(settingsHTML()); break;
     case 'closeSheet': closeSheet(); if(tab!=='today') render(); else { app.innerHTML=viewToday(); requestAnimationFrame(updateHero);} break;
@@ -1144,7 +1337,7 @@ document.addEventListener('click', async (ev)=>{
     case 'customArc': {
       const p={id:uid(),name:'Mon programme',emoji:'🎯',color:'#3b82f6',desc:'',days:90,rules:[]};
       S.programs.push(p); save(); render(); editTarget=p.id; openSheet(arcEditorHTML()); break; }
-    case 'askStopArc': document.getElementById('stopArcZone').innerHTML=confirmBox('Arrêter '+esc(S.arc.name)+' ? Les défis de 30 jours continuent.','doStopArc','Arrêter le défi'); break;
+    case 'askStopArc': document.getElementById('stopArcZone').innerHTML=confirmBox('Arrêter '+esc(S.arc.name)+' ? Les petits défis continuent.','doStopArc','Arrêter le défi'); break;
     case 'doStopArc': S.pastArcs.push({...S.arc,endedOn:todayKey()}); S.arc=null; save(); closeSheet(true); render(); toast('Défi arrêté'); break;
     case 'editArc': editTarget='arc'; openSheet(arcEditorHTML()); break;
     case 'arcColor': { const a=tgt(); readArcMeta(a); a.color=el.dataset.v; save(); setSheet(arcEditorHTML()); render(); break; }
@@ -1157,7 +1350,7 @@ document.addEventListener('click', async (ev)=>{
     case 'newRule': readArcMeta(tgt()); draft={kind:'rule',title:'Nouvelle règle',name:'',icon:'🎯',color:'#3b82f6'}; setSheet(editorHTML()); break;
     case 'editRule': { const r=tgt().rules.find(x=>x.id===id); draft={kind:'rule',title:'Modifier la règle',id:r.id,name:r.name,icon:r.icon,color:r.color}; setSheet(editorHTML()); break; }
 
-    case 'newCh': draft={kind:'ch',title:'Nouveau défi 30 jours',name:'',desc:'',icon:'💪',color:'#ef4444'}; openSheet(editorHTML()); break;
+    case 'newCh': draft={kind:'ch',days:defisTab==='7'?7:30,title:defisTab==='7'?'Nouveau défi d\'une semaine':'Nouveau défi 30 jours',name:'',desc:'',icon:'💪',color:'#ef4444'}; openSheet(editorHTML()); break;
     case 'chMenu': {
       const c=S.challenges.find(x=>x.id===id); if(!c) break; const on=chActive(c,todayKey());
       openSheet(`<div class="row"><span class="ico-sm" style="--c:${c.color}">${icon(c.icon)}</span><h2>${esc(c.name)}</h2></div>
@@ -1169,7 +1362,7 @@ document.addEventListener('click', async (ev)=>{
     case 'askDelCh': document.getElementById('delChZone').innerHTML=confirmBox('Supprimer ce défi pour de bon ?','doDelCh" data-id="'+id,'Supprimer'); break;
     case 'doDelCh': S.challenges=S.challenges.filter(x=>x.id!==id); save(); closeSheet(); render(); toast('Défi supprimé'); break;
     case 'editCh': { const c=S.challenges.find(x=>x.id===id); draft={kind:'ch',title:'Modifier le défi',id:c.id,name:c.name,desc:c.desc,icon:c.icon,color:c.color}; openSheet(editorHTML()); break; }
-    case 'startCh': { const c=S.challenges.find(x=>x.id===id); c.start=todayKey(); save(); closeSheet(true); render(); toast(c.name+' : jour 1/30'); buzz(20); break; }
+    case 'startCh': { const c=S.challenges.find(x=>x.id===id); c.start=todayKey(); save(); closeSheet(true); render(); toast(c.name+' : jour 1/'+chDays(c)); buzz(20); break; }
     case 'askStopCh': document.getElementById('stopCh-'+id).innerHTML=confirmBox('Arrêter ce défi ?','doStopCh" data-id="'+id,'Arrêter'); break;
     case 'askStopChSheet': document.getElementById('stopChSheet').innerHTML=confirmBox('Arrêter ce défi ?','doStopCh" data-id="'+id,'Arrêter'); break;
     case 'doStopCh': { const c=S.challenges.find(x=>x.id===id); if(c) c.start=null; save(); closeSheet(true); render(); toast('Défi arrêté'); break; }
@@ -1187,7 +1380,7 @@ document.addEventListener('click', async (ev)=>{
         save(); setSheet(arcEditorHTML()); render();
       } else {
         if(draft.id){ Object.assign(S.challenges.find(x=>x.id===draft.id),{name:draft.name.trim(),desc:draft.desc.trim(),icon:draft.icon,color:draft.color}); }
-        else S.challenges.unshift({id:uid(),name:draft.name.trim(),desc:draft.desc.trim(),icon:draft.icon,color:draft.color,start:null});
+        else S.challenges.unshift({id:uid(),days:draft.days||30,name:draft.name.trim(),desc:draft.desc.trim(),icon:draft.icon,color:draft.color,start:null});
         save(); closeSheet(); render();
       }
       toast('Enregistré'); break; }
