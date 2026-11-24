@@ -495,9 +495,11 @@ function dayInfo(k){
   const req = (k===todayKey() || !L.req) ? tasksFor(k).map(t=>t.key) : L.req;
   const done = req.filter(x=>L.done&&L.done[x]).length;
   const full = req.length>0&&done===req.length;
-  return {total:req.length, done, full, part:done>0&&done<req.length, frozen:!full && !!(S.frozen&&S.frozen[k])};
+  return {total:req.length, done, full, part:done>0&&done<req.length, keep:!full&&req.length>0&&done*4>=req.length*3, frozen:!full && !!(S.frozen&&S.frozen[k])};
 }
 const okDay = k => { const d=dayInfo(k); return d.full||d.frozen; };
+// Série perso : journée complète (ou gelée) = +1 ; au moins 3/4 des tâches = la série stagne ; sinon elle s'éteint
+const stepOf = k => { const d=dayInfo(k); return (d.full||d.frozen)?'up':(d.keep?'stay':'break'); };
 function firstKey(){
   const ks=Object.keys(S.log).concat(Object.keys(S.frozen||{}));
   if(S.arc) ks.push(S.arc.start);
@@ -510,7 +512,7 @@ function earnedGels(){
     const d=dayInfo(k);
     if(d.full){ run++; if(run%10===0) earned++; }
     else if(d.frozen){}
-    else if(k!==t) run=0;
+    else if(!d.keep && k!==t) run=0;
     k=addDays(k,1);
   }
   return earned;
@@ -519,7 +521,7 @@ const usedGels = () => Object.keys(S.frozen||{}).filter(k=>!dayInfo(k).full).len
 const gelsLeft = () => Math.max(0, earnedGels()-usedGels());
 function toNextGel(){
   const t=todayKey(); let k=firstKey(), run=0;
-  for(let i=0;i<3000 && k<=t;i++){ const d=dayInfo(k); if(d.full) run++; else if(!d.frozen && k!==t) run=0; k=addDays(k,1); }
+  for(let i=0;i<3000 && k<=t;i++){ const d=dayInfo(k); if(d.full) run++; else if(!d.frozen && !d.keep && k!==t) run=0; k=addDays(k,1); }
   return 10-(run%10);
 }
 // Gel automatique : si des jours passés cassent une série en cours, on les gèle avec les gels en stock.
@@ -529,7 +531,7 @@ function autoFreeze(){
   let k=addDays(t,-1), before=false;
   for(let i=0;i<60 && k>=first;i++){
     const d=dayInfo(k);
-    if(d.full||d.frozen){ before=true; break; }
+    if(d.full||d.frozen||d.keep){ before=true; break; }
     if(!d.total) return 0;
     gap.push(k); k=addDays(k,-1);
   }
@@ -553,12 +555,12 @@ function streak(){
   let n=0, k=todayKey();
   if(okDay(k)) n++;
   k=addDays(k,-1);
-  for(let i=0;i<3000;i++){ if(okDay(k)){n++; k=addDays(k,-1);} else break; }
+  for(let i=0;i<3000;i++){ const st=stepOf(k); if(st==='up') n++; else if(st!=='stay') break; k=addDays(k,-1); }
   return n;
 }
 function bestStreak(){
   const t=todayKey(); let k=firstKey(), cur=0, best=0;
-  for(let i=0;i<3000 && k<=t;i++){ if(okDay(k)){ cur++; best=Math.max(best,cur); } else if(k!==t) cur=0; k=addDays(k,1); }
+  for(let i=0;i<3000 && k<=t;i++){ const st=stepOf(k); if(st==='up'){ cur++; best=Math.max(best,cur); } else if(st==='break' && k!==t) cur=0; k=addDays(k,1); }
   return best;
 }
 
@@ -810,7 +812,7 @@ function viewProgres(){
       <p class="muted" style="margin:0;font-size:12.5px">Touche un jour passé pour cocher un oubli, ou un jour à venir pour le geler.</p>
     </div>
     <div class="card gel-card"><div class="row"><span class="gel-ico">❄️</span><div style="flex:1;min-width:0"><h3 style="font-size:17px">Gels de série : ${gelsLeft()}</h3>
-      <p class="muted" style="margin:2px 0 0;font-size:13px">1 gel gagné tous les 10 jours complets d'affilée. S'il te reste un gel et que tu rates un jour, il est utilisé tout seul pour sauver ta série. Encore ${toNextGel()} jour${toNextGel()>1?'s':''} pour le prochain. Un gel protège ta série un jour où tu ne peux pas tout faire (vacances, malade).</p></div></div></div>
+      <p class="muted" style="margin:2px 0 0;font-size:13px">1 gel gagné tous les 10 jours complets d'affilée. Si tu fais au moins les 3/4 de tes tâches, ta série ne monte pas mais ne s'éteint pas. S'il te reste un gel et que tu rates un jour, il est utilisé tout seul pour sauver ta série. Encore ${toNextGel()} jour${toNextGel()>1?'s':''} pour le prochain. Un gel protège ta série un jour où tu ne peux pas tout faire (vacances, malade).</p></div></div></div>
     <div class="stats">
       <div class="stat"><span class="label">Complétion</span><span class="v">${pct} %</span></div>
       <div class="stat"><span class="label">Jours parfaits</span><span class="v">${full}</span></div>
@@ -900,7 +902,7 @@ async function socialLoad(){
 }
 function histMap(n){
   const out={}, first=firstKey(); let k=todayKey();
-  for(let i=0;i<n && k>=first;i++){ const d=dayInfo(k); out[k]=d.full?'f':(d.frozen?'z':(d.part?'p':(d.total?'m':'-'))); k=addDays(k,-1); }
+  for(let i=0;i<n && k>=first;i++){ const d=dayInfo(k); out[k]=d.full?'f':(d.frozen?'z':(d.keep?'q':(d.part?'p':(d.total?'m':'-')))); k=addDays(k,-1); }
   return out;
 }
 function myStats(){
@@ -956,7 +958,7 @@ function syncArcGroup(){
 function memState(m,k){
   if(m.me){ const d=dayInfo(k); return (d.full||d.frozen)?'f':(d.done>0?'p':'m'); }
   const s=(m.data&&m.data.hist&&m.data.hist[k])||'';
-  return (s==='f'||s==='z')?'f':(s==='p'?'p':'m');
+  return (s==='f'||s==='z')?'f':((s==='p'||s==='q')?'p':'m');
 }
 // Règle de la flamme de groupe
 // 2 ou 3 membres : tout le monde au complet sinon elle s'éteint.
@@ -1004,7 +1006,7 @@ function friendStreak(f){
   // La série du pote est recalculée avec son historique, pour qu'elle soit juste même s'il n'a pas ouvert l'appli aujourd'hui
   if(!f.data||!f.data.hist) return 0;
   let k=todayKey(), n=0; if(fOk(f,k)) n++; k=addDays(k,-1);
-  for(let i=0;i<400;i++){ if(fOk(f,k)){n++;k=addDays(k,-1);} else break; }
+  for(let i=0;i<400;i++){ const s=fState(f,k); if(s==='f'||s==='z') n++; else if(s!=='q') break; k=addDays(k,-1); }
   return n;
 }
 function avatar(p){ const ch=(p||'?').trim().charAt(0).toUpperCase(); let h=0; for(const c of p||'') h=(h*31+c.charCodeAt(0))%360;
@@ -1110,7 +1112,7 @@ function friendSheetHTML(f){
   if(det&&det.arc){
     const a=det.arc;
     for(let i=0;i<a.days;i++){ const kk=addDays(a.start,i), s=fState(f,kk), fut=kk>todayKey();
-      const cls= s==='f'?'full':s==='z'?'frozen':s==='p'?'part':(fut?'future':(s==='m'?'miss':''));
+      const cls= s==='f'?'full':s==='z'?'frozen':(s==='p'||s==='q')?'part':(fut?'future':(s==='m'?'miss':''));
       cal+=`<button class="${cls} ${kk===todayKey()?'today':''}" tabindex="-1">${s==='z'?'❄':i+1}</button>`; }
   }
   return `<div class="row">${avatar(f.pseudo)}<h2>@${esc(f.pseudo)}</h2><span class="spacer"></span><button class="btn small ghost" data-act="closeSheet">Fermer</button></div>
@@ -1200,7 +1202,7 @@ function viewClassement(){
       <span class="t">${esc(r.name)}${r.mine?` <small class="muted">(${solo?'toi':'ton groupe'})</small>`:''}${r.sub?`<small class="muted" style="display:block;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.sub)}</small>`:''}</span>${tierBadge(r.streak,TL)}<span class="duo-n">${flameSVG(r.streak>0)}${r.streak}</span></div>`).join('')}</div>`:''}
     <div class="section"><div class="section-head"><span class="label">Les grades</span><button class="link" data-act="refreshBoard">Actualiser</button></div>
       <div class="chips">${TL.slice().reverse().map(t=>`<span class="tier t-${t[2]}">${t[1]} · ${t[0]} j</span>`).join('')}</div>
-      <p class="muted" style="margin:0;font-size:12.5px">${solo?'Ta série solo compte tes journées complètes d\'affilée, gels compris. Elle ne dépend que de toi.':'Groupes de 2 ou 3 : tout le monde doit finir sa journée au complet. Groupes de 4 et plus : si au moins la moitié a fini et le reste a fait une partie, la flamme stagne. Un seul qui ne fait rien et elle s\'éteint.'}</p></div>
+      <p class="muted" style="margin:0;font-size:12.5px">${solo?'Ta série solo compte tes journées complètes d\'affilée, gels compris. Si tu fais au moins les 3/4 de tes tâches, elle ne monte pas mais ne s\'éteint pas.':'Groupes de 2 ou 3 : tout le monde doit finir sa journée au complet. Groupes de 4 et plus : si au moins la moitié a fini et le reste a fait une partie, la flamme stagne. Un seul qui ne fait rien et elle s\'éteint.'}</p></div>
   </div>`;
 }
 
