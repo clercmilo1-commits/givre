@@ -250,6 +250,13 @@ h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:-.
 .rankno small{display:block;font-family:var(--body);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .req{border-color:color-mix(in oklab,var(--flame-b) 45%,var(--line));background:color-mix(in oklab,var(--flame-b) 10%,var(--surface))}
 .lock-card{gap:6px}
+.arc-rules summary{list-style:none;cursor:pointer;display:flex;flex-direction:column;gap:4px}
+.arc-rules summary::-webkit-details-marker{display:none}
+.arc-rules .see{font-size:13px;font-weight:600;color:var(--ice)}
+.arc-rules .see::after{content:' ▾'}
+.arc-rules[open] .see::after{content:' ▴'}
+.arc-rules[open] .see{font-size:0}.arc-rules[open] .see::before{content:'Masquer les règles';font-size:13px}
+.arc-rules .list{margin-top:10px}
 .pick{width:100%;text-align:left}
 .pick .rd{width:24px;height:24px;border-radius:50%;border:2px solid var(--line);flex:none;display:grid;place-items:center;transition:background .15s,border-color .15s}
 .pick[aria-pressed="true"]{border-color:color-mix(in oklab,var(--ice) 55%,var(--line))}
@@ -905,6 +912,11 @@ function histMap(n){
   for(let i=0;i<n && k>=first;i++){ const d=dayInfo(k); out[k]=d.full?'f':(d.frozen?'z':(d.keep?'q':(d.part?'p':(d.total?'m':'-')))); k=addDays(k,-1); }
   return out;
 }
+function missMap(n){
+  const out={}, first=firstKey(); let k=todayKey();
+  for(let i=0;i<n && k>=first;i++){ const d=dayInfo(k); out[k]=(d.full||d.frozen)?0:(d.total-d.done); k=addDays(k,-1); }
+  return out;
+}
 function myStats(){
   const k=todayKey(), di=dayInfo(k);
   const g=myGroup();
@@ -912,11 +924,11 @@ function myStats(){
   return {v:2, at:Date.now(), day:k,
     streak:streak(), best:bestStreak(), gels:gelsLeft(),
     today:{done:di.done,total:di.total,full:di.full||di.frozen},
-    hist:histMap(150), groups};
+    hist:histMap(150), miss:missMap(150), groups};
 }
 function myDetail(){
   const k=todayKey(), a=S.arc;
-  return {arc:a?{name:a.name,emoji:a.emoji,days:a.days,start:a.start,day:inArc(k)?arcDay(k):null}:null,
+  return {arc:a?{name:a.name,emoji:a.emoji,days:a.days,start:a.start,day:inArc(k)?arcDay(k):null,rules:a.rules.map(r=>({name:r.name,icon:isImg(r.icon)?'🎯':r.icon}))}:null,
     ch:S.challenges.filter(c=>chActive(c,k)).map(c=>({name:c.name,icon:isImg(c.icon)?'💪':c.icon,day:diffDays(c.start,k)+1,len:chDays(c)}))};
 }
 /* ---------- Groupes ---------- */
@@ -964,14 +976,28 @@ function memState(m,k){
 // 2 ou 3 membres : tout le monde au complet sinon elle s'éteint.
 // 4 et plus : tout le monde au complet = +1 ; au moins la moitié au complet et le reste en partiel = elle stagne ;
 // une personne qui n'a rien fait, ou moins de la moitié au complet = elle s'éteint.
+// Tâches non faites par un membre ce jour-là (null = on ne sait pas, il n'a pas ouvert l'appli)
+function memMiss(m,k){
+  if(m.me){ const d=dayInfo(k); return (d.full||d.frozen)?0:(d.total-d.done); }
+  const s=(m.data&&m.data.hist&&m.data.hist[k])||'';
+  if(s==='f'||s==='z') return 0;
+  const v=m.data&&m.data.miss&&m.data.miss[k];
+  return typeof v==='number'?v:null;
+}
 function groupDay(g,k){
   const act=activeMembers(g,k), n=act.length;
   if(n<2) return 'skip';
+  // 2 ou 3 membres : autant de tâches ratées autorisées (au total) que de membres
+  if(n<=3){
+    const ms=act.map(m=>memMiss(m,k));
+    if(ms.includes(null)) return 'reset';
+    const tot=ms.reduce((a,b)=>a+b,0);
+    return tot===0?'up':(tot<=n?'stay':'reset');
+  }
   const st=act.map(m=>memState(m,k));
   if(st.includes('m')) return 'reset';
   const full=st.filter(x=>x==='f').length;
   if(full===n) return 'up';
-  if(n<=3) return 'reset';
   return full*2>=n ? 'stay' : 'reset';
 }
 function groupStreak(g){
@@ -985,7 +1011,7 @@ function memToday(m){
 }
 function groupRuleText(n){
   return n<=3
-    ? `Groupe de ${n} : la flamme avance seulement si tout le monde finit sa journée au complet. Sinon, elle s'éteint pour tout le monde.`
+    ? `Groupe de ${n} : tout le monde au complet, la flamme monte. Entre 1 et ${n} tâches ratées au total dans le groupe, elle stagne. Plus de ${n}, elle s'éteint pour tout le monde.`
     : `Tout le monde au complet : +1. Au moins la moitié au complet et le reste en partiel : la flamme reste au même nombre. Si quelqu'un ne fait rien, ou si moins de la moitié a fini au complet : elle s'éteint pour tout le monde.`;
 }
 let pubT=null;
@@ -1123,7 +1149,8 @@ function friendSheetHTML(f){
       <div class="stat"><span class="label">Aujourd'hui</span><span class="v">${ft.seen?ft.done+'/'+ft.total:'–'}</span></div>
       <div class="stat"><span class="label">Gels</span><span class="v">${d.gels||0}</span></div></div>`:''}
     ${d&&!det?`<div class="card lock-card"><strong>🔒 Profil privé</strong><p class="muted" style="margin:0;font-size:13.5px">@${esc(f.pseudo)} montre seulement sa série, sa meilleure série et sa journée.</p></div>`:''}
-    ${det&&det.arc?`<div class="card"><div class="row"><h3>${esc(det.arc.emoji)} ${esc(det.arc.name)}</h3><span class="spacer"></span>${det.arc.day?`<span class="pill">Jour ${det.arc.day}/${det.arc.days}</span>`:''}</div><div class="cal">${cal}</div></div>`:''}
+    ${det&&det.arc?`<div class="card"><details class="arc-rules"><summary><div class="row"><h3>${esc(det.arc.emoji)} ${esc(det.arc.name)}</h3><span class="spacer"></span>${det.arc.day?`<span class="pill">Jour ${det.arc.day}/${det.arc.days}</span>`:''}</div><span class="muted see">Voir les règles</span></summary>
+      ${det.arc.rules&&det.arc.rules.length?`<div class="list">${det.arc.rules.map(r=>`<div class="li"><span class="e">${esc(r.icon)}</span><span class="t">${esc(r.name)}</span></div>`).join('')}</div>`:`<p class="muted" style="margin:0;font-size:13px">@${esc(f.pseudo)} doit ouvrir la dernière version de l'appli pour que ses règles s'affichent.</p>`}</details><div class="cal">${cal}</div></div>`:''}
     ${det&&det.ch&&det.ch.length?`<div class="section"><span class="label">Défis en cours</span><div class="chips">${det.ch.map(c=>`<span class="chip">${esc(c.icon)} ${esc(c.name)} · J${c.day}/${c.len||30}</span>`).join('')}</div></div>`:''}
     <button class="btn danger block" data-act="askRemoveFriend" data-id="${f.id}">Retirer des amis</button><div id="rmZone"></div>`;
 }
@@ -1202,7 +1229,7 @@ function viewClassement(){
       <span class="t">${esc(r.name)}${r.mine?` <small class="muted">(${solo?'toi':'ton groupe'})</small>`:''}${r.sub?`<small class="muted" style="display:block;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.sub)}</small>`:''}</span>${tierBadge(r.streak,TL)}<span class="duo-n">${flameSVG(r.streak>0)}${r.streak}</span></div>`).join('')}</div>`:''}
     <div class="section"><div class="section-head"><span class="label">Les grades</span><button class="link" data-act="refreshBoard">Actualiser</button></div>
       <div class="chips">${TL.slice().reverse().map(t=>`<span class="tier t-${t[2]}">${t[1]} · ${t[0]} j</span>`).join('')}</div>
-      <p class="muted" style="margin:0;font-size:12.5px">${solo?'Ta série solo compte tes journées complètes d\'affilée, gels compris. Si tu fais au moins les 3/4 de tes tâches, elle ne monte pas mais ne s\'éteint pas.':'Groupes de 2 ou 3 : tout le monde doit finir sa journée au complet. Groupes de 4 et plus : si au moins la moitié a fini et le reste a fait une partie, la flamme stagne. Un seul qui ne fait rien et elle s\'éteint.'}</p></div>
+      <p class="muted" style="margin:0;font-size:12.5px">${solo?'Ta série solo compte tes journées complètes d\'affilée, gels compris. Si tu fais au moins les 3/4 de tes tâches, elle ne monte pas mais ne s\'éteint pas.':'Groupes de 2 ou 3 : on compte les tâches ratées de tout le groupe. Aucune, la flamme monte ; jusqu\'à 2 (ou 3 pour 3 personnes), elle stagne ; au-delà, elle s\'éteint. Groupes de 4 et plus : si au moins la moitié a fini et le reste a fait une partie, la flamme stagne. Un seul qui ne fait rien et elle s\'éteint.'}</p></div>
   </div>`;
 }
 
